@@ -1,17 +1,24 @@
-import { UserSummary } from '../types/metrics';
+import { UserSummary, CopilotMetrics } from '../types/metrics';
 import { useState } from 'react';
 
 interface UniqueUsersViewProps {
   users: UserSummary[];
+  rawMetrics: CopilotMetrics[];
   onBack: () => void;
+  onUserClick: (userLogin: string, userId: number, userMetrics: CopilotMetrics[]) => void;
 }
 
 type SortField = 'user_login' | 'total_user_initiated_interactions' | 'total_code_generation_activities' | 'total_code_acceptance_activities' | 'days_active';
 type SortDirection = 'asc' | 'desc';
 
-export default function UniqueUsersView({ users, onBack }: UniqueUsersViewProps) {
+export default function UniqueUsersView({ users, rawMetrics, onBack, onUserClick }: UniqueUsersViewProps) {
   const [sortField, setSortField] = useState<SortField>('total_user_initiated_interactions');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
+
+  const handleUserClick = (user: UserSummary) => {
+    const userMetrics = rawMetrics.filter(metric => metric.user_id === user.user_id);
+    onUserClick(user.user_login, user.user_id, userMetrics);
+  };
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -72,7 +79,6 @@ export default function UniqueUsersView({ users, onBack }: UniqueUsersViewProps)
         <div className="flex justify-between items-center">
           <div>
             <h2 className="text-xl font-semibold text-gray-900">Unique Users</h2>
-            <p className="text-sm text-gray-600 mt-1">Click column headers to sort • Wide screen optimized</p>
           </div>
           <button
             onClick={onBack}
@@ -175,7 +181,11 @@ export default function UniqueUsersView({ users, onBack }: UniqueUsersViewProps)
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {sortedUsers.map((user) => (
-              <tr key={user.user_id} className="hover:bg-gray-50">
+              <tr 
+                key={user.user_id} 
+                className="hover:bg-gray-50 cursor-pointer transition-colors"
+                onClick={() => handleUserClick(user)}
+              >
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center">
                     <div className="flex-shrink-0 h-10 w-10">

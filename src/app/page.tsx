@@ -4,8 +4,9 @@ import { useState } from 'react';
 import { CopilotMetrics, MetricsStats, UserSummary } from '../types/metrics';
 import { parseMetricsFile, calculateStats, calculateUserSummaries } from '../utils/metricsParser';
 import UniqueUsersView from '../components/UniqueUsersView';
+import UserDetailsView from '../components/UserDetailsView';
 
-type ViewMode = 'overview' | 'users';
+type ViewMode = 'overview' | 'users' | 'userDetails';
 
 export default function Home() {
   const [metrics, setMetrics] = useState<CopilotMetrics[]>([]);
@@ -14,6 +15,11 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [currentView, setCurrentView] = useState<ViewMode>('overview');
+  const [selectedUser, setSelectedUser] = useState<{
+    login: string;
+    id: number;
+    metrics: CopilotMetrics[];
+  } | null>(null);
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -44,6 +50,16 @@ export default function Home() {
     setUserSummaries([]);
     setError(null);
     setCurrentView('overview');
+    setSelectedUser(null);
+  };
+
+  const handleUserClick = (userLogin: string, userId: number, userMetrics: CopilotMetrics[]) => {
+    setSelectedUser({
+      login: userLogin,
+      id: userId,
+      metrics: userMetrics
+    });
+    setCurrentView('userDetails');
   };
 
   const formatDate = (dateString: string) => {
@@ -123,7 +139,19 @@ export default function Home() {
         {stats && currentView === 'users' && (
           <UniqueUsersView 
             users={userSummaries} 
+            rawMetrics={metrics}
             onBack={() => setCurrentView('overview')} 
+            onUserClick={handleUserClick}
+          />
+        )}
+
+        {/* Show User Details View */}
+        {stats && currentView === 'userDetails' && selectedUser && (
+          <UserDetailsView
+            userMetrics={selectedUser.metrics}
+            userLogin={selectedUser.login}
+            userId={selectedUser.id}
+            onBack={() => setCurrentView('users')}
           />
         )}
 
