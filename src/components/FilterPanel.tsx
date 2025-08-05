@@ -9,13 +9,17 @@ interface FilterPanelProps {
   currentFilter: DateRangeFilter;
   reportStartDay: string;
   reportEndDay: string;
+  removeUnknownLanguages: boolean;
+  onRemoveUnknownLanguagesChange: (remove: boolean) => void;
 }
 
 export default function FilterPanel({ 
   onDateRangeChange, 
   currentFilter, 
   reportStartDay, 
-  reportEndDay 
+  reportEndDay,
+  removeUnknownLanguages,
+  onRemoveUnknownLanguagesChange
 }: FilterPanelProps) {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -116,11 +120,35 @@ export default function FilterPanel({
         </p>
       </div>
 
+      {/* Language Filter */}
+      <div className="mb-6">
+        <label className="block text-sm font-medium text-gray-700 mb-3">
+          Language Filters
+        </label>
+        <div className="space-y-2">
+          <label className="flex items-center">
+            <input
+              type="checkbox"
+              checked={removeUnknownLanguages}
+              onChange={(e) => onRemoveUnknownLanguagesChange(e.target.checked)}
+              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+            />
+            <span className="ml-2 text-sm text-gray-600">
+              Remove &quot;unknown&quot; languages
+            </span>
+          </label>
+        </div>
+        <p className="mt-2 text-xs text-gray-500">
+          Excludes entries where language is &quot;unknown&quot; or empty
+        </p>
+      </div>
+
       {/* Info Section */}
       <div className="border-t border-gray-200 pt-4">
         <h4 className="text-sm font-medium text-gray-700 mb-2">About Filters</h4>
         <div className="text-xs text-gray-500 space-y-1">
-          <p>• Filters are applied to all metrics and charts</p>
+          <p>• Date filters are applied to all metrics and charts</p>
+          <p>• Language filters affect statistics calculations</p>
           <p>• Date ranges are calculated from the report end date</p>
           <p>• Changes update all views instantly</p>
         </div>

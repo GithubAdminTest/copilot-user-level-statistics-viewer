@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import { CopilotMetrics, MetricsStats } from '../types/metrics';
-import { parseMetricsFile, calculateStats, calculateUserSummaries, calculateDailyEngagement, calculateLanguageStats } from '../utils/metricsParser';
+import { parseMetricsFile, calculateStats, calculateUserSummaries, calculateDailyEngagement, calculateLanguageStats, filterUnknownLanguages } from '../utils/metricsParser';
 import { filterMetricsByDateRange, getFilteredDateRange } from '../utils/dateFilters';
 import UniqueUsersView from '../components/UniqueUsersView';
 import UserDetailsView from '../components/UserDetailsView';
@@ -25,8 +25,9 @@ export default function Home() {
     metrics: CopilotMetrics[];
   } | null>(null);
   const [dateRangeFilter, setDateRangeFilter] = useState<DateRangeFilter>('all');
+  const [removeUnknownLanguages, setRemoveUnknownLanguages] = useState<boolean>(false);
 
-  // Calculate filtered data based on date range
+  // Calculate filtered data based on date range and language filters
   const filteredData = useMemo(() => {
     if (!rawMetrics.length || !originalStats) {
       return {
@@ -38,7 +39,11 @@ export default function Home() {
       };
     }
 
-    const filteredMetrics = filterMetricsByDateRange(rawMetrics, dateRangeFilter, originalStats.reportEndDay);
+    // Apply language filter first if enabled
+    const processedMetrics = removeUnknownLanguages ? filterUnknownLanguages(rawMetrics) : rawMetrics;
+    
+    // Then apply date range filter
+    const filteredMetrics = filterMetricsByDateRange(processedMetrics, dateRangeFilter, originalStats.reportEndDay);
     const filteredStats = calculateStats(filteredMetrics);
     const filteredUserSummaries = calculateUserSummaries(filteredMetrics);
     const filteredEngagementData = calculateDailyEngagement(filteredMetrics);
@@ -59,7 +64,7 @@ export default function Home() {
       engagementData: filteredEngagementData,
       languageStats: filteredLanguageStats
     };
-  }, [rawMetrics, originalStats, dateRangeFilter]);
+  }, [rawMetrics, originalStats, dateRangeFilter, removeUnknownLanguages]);
 
   const { metrics, stats, userSummaries, engagementData, languageStats } = filteredData;
 
@@ -91,10 +96,15 @@ export default function Home() {
     setCurrentView('overview');
     setSelectedUser(null);
     setDateRangeFilter('all');
+    setRemoveUnknownLanguages(false);
   };
 
   const handleDateRangeChange = (filter: DateRangeFilter) => {
     setDateRangeFilter(filter);
+  };
+
+  const handleRemoveUnknownLanguagesChange = (remove: boolean) => {
+    setRemoveUnknownLanguages(remove);
   };
 
   const handleUserClick = (userLogin: string, userId: number, userMetrics: CopilotMetrics[]) => {
@@ -277,8 +287,9 @@ export default function Home() {
                     </svg>
                   </div>
                   <div className="ml-4">
-                    <p className="text-sm font-medium text-violet-600">Agent Users</p>
+                    <p className="text-sm font-medium text-violet-600">Agent Mode Users</p>
                     <p className="text-2xl font-bold text-violet-900">{stats.agentUsers.toLocaleString()}</p>
+                    <p className="text-xs text-violet-700">Out of {stats.uniqueUsers.toLocaleString()} unique users</p>
                   </div>
                 </div>
               </div>
@@ -400,6 +411,8 @@ export default function Home() {
                 currentFilter={dateRangeFilter}
                 reportStartDay={originalStats?.reportStartDay || ''}
                 reportEndDay={originalStats?.reportEndDay || ''}
+                removeUnknownLanguages={removeUnknownLanguages}
+                onRemoveUnknownLanguagesChange={handleRemoveUnknownLanguagesChange}
               />
             </div>
           </div>

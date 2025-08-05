@@ -16,6 +16,18 @@ export function parseMetricsFile(fileContent: string): CopilotMetrics[] {
   return metrics;
 }
 
+export function filterUnknownLanguages(metrics: CopilotMetrics[]): CopilotMetrics[] {
+  return metrics.map(metric => ({
+    ...metric,
+    totals_by_language_feature: metric.totals_by_language_feature.filter(
+      item => item.language.toLowerCase() !== 'unknown' && item.language.trim() !== ''
+    ),
+    totals_by_language_model: metric.totals_by_language_model.filter(
+      item => item.language.toLowerCase() !== 'unknown' && item.language.trim() !== ''
+    )
+  }));
+}
+
 export function calculateStats(metrics: CopilotMetrics[]): MetricsStats {
   if (metrics.length === 0) {
     return {
@@ -66,10 +78,8 @@ export function calculateStats(metrics: CopilotMetrics[]): MetricsStats {
     }
   }
   
-  // Get sorted language entries and skip "unknown"
   const sortedLanguages = Array.from(languageEngagements.entries())
-    .sort((a, b) => b[1] - a[1])
-    .filter(([language]) => language.toLowerCase() !== 'unknown');
+    .sort((a, b) => b[1] - a[1]);
   
   const topLanguageEntry = sortedLanguages[0];
   const topLanguage = topLanguageEntry 
