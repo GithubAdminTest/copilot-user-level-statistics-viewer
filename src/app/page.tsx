@@ -226,15 +226,22 @@ export default function Home() {
                 onClick={() => setCurrentView('users')}
                 className="bg-blue-50 rounded-lg p-4 border border-blue-200 hover:bg-blue-100 transition-colors text-left group"
               >
-                <div className="flex items-center">
-                  <div className="flex-shrink-0">
-                    <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
-                    </svg>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <div className="flex-shrink-0">
+                      <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+                      </svg>
+                    </div>
+                    <div className="ml-4">
+                      <p className="text-sm font-medium text-blue-600 group-hover:text-blue-700">Unique Users</p>
+                      <p className="text-2xl font-bold text-blue-900">{stats.uniqueUsers.toLocaleString()}</p>
+                    </div>
                   </div>
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-blue-600 group-hover:text-blue-700">Unique Users</p>
-                    <p className="text-2xl font-bold text-blue-900">{stats.uniqueUsers.toLocaleString()}</p>
+                  <div className="flex-shrink-0">
+                    <svg className="w-6 h-6 text-blue-500 group-hover:text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
                   </div>
                 </div>
               </button>
@@ -301,16 +308,23 @@ export default function Home() {
                 onClick={() => setCurrentView('languages')}
                 className="bg-purple-50 rounded-lg p-4 border border-purple-200 hover:bg-purple-100 transition-colors text-left group"
               >
-                <div className="flex items-center">
-                  <div className="flex-shrink-0">
-                    <svg className="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
-                    </svg>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <div className="flex-shrink-0">
+                      <svg className="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                      </svg>
+                    </div>
+                    <div className="ml-4">
+                      <p className="text-sm font-medium text-purple-600 group-hover:text-purple-700">Top Language</p>
+                      <p className="text-lg font-bold text-purple-900">{stats.topLanguage?.name || 'N/A'}</p>
+                      <p className="text-xs text-purple-700">{stats.topLanguage?.engagements?.toLocaleString() || '0'} engagements</p>
+                    </div>
                   </div>
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-purple-600 group-hover:text-purple-700">Top Language</p>
-                    <p className="text-lg font-bold text-purple-900">{stats.topLanguage?.name || 'N/A'}</p>
-                    <p className="text-xs text-purple-700">{stats.topLanguage?.engagements?.toLocaleString() || '0'} engagements</p>
+                  <div className="flex-shrink-0">
+                    <svg className="w-6 h-6 text-purple-500 group-hover:text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
                   </div>
                 </div>
               </button>
