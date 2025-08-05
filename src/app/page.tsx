@@ -2,14 +2,15 @@
 
 import { useState, useMemo } from 'react';
 import { CopilotMetrics, MetricsStats, UserSummary } from '../types/metrics';
-import { parseMetricsFile, calculateStats, calculateUserSummaries, calculateDailyEngagement, DailyEngagementData } from '../utils/metricsParser';
+import { parseMetricsFile, calculateStats, calculateUserSummaries, calculateDailyEngagement, calculateLanguageStats, DailyEngagementData, LanguageStats } from '../utils/metricsParser';
 import { filterMetricsByDateRange, getFilteredDateRange } from '../utils/dateFilters';
 import UniqueUsersView from '../components/UniqueUsersView';
 import UserDetailsView from '../components/UserDetailsView';
+import LanguagesView from '../components/LanguagesView';
 import EngagementChart from '../components/EngagementChart';
 import FilterPanel, { DateRangeFilter } from '../components/FilterPanel';
 
-type ViewMode = 'overview' | 'users' | 'userDetails';
+type ViewMode = 'overview' | 'users' | 'userDetails' | 'languages';
 
 export default function Home() {
   const [rawMetrics, setRawMetrics] = useState<CopilotMetrics[]>([]);
@@ -31,7 +32,8 @@ export default function Home() {
         metrics: [],
         stats: null,
         userSummaries: [],
-        engagementData: []
+        engagementData: [],
+        languageStats: []
       };
     }
 
@@ -39,6 +41,7 @@ export default function Home() {
     const filteredStats = calculateStats(filteredMetrics);
     const filteredUserSummaries = calculateUserSummaries(filteredMetrics);
     const filteredEngagementData = calculateDailyEngagement(filteredMetrics);
+    const filteredLanguageStats = calculateLanguageStats(filteredMetrics);
 
     // Update the date range in stats based on filter
     const { startDay, endDay } = getFilteredDateRange(dateRangeFilter, originalStats.reportStartDay, originalStats.reportEndDay);
@@ -52,11 +55,12 @@ export default function Home() {
       metrics: filteredMetrics,
       stats: updatedStats,
       userSummaries: filteredUserSummaries,
-      engagementData: filteredEngagementData
+      engagementData: filteredEngagementData,
+      languageStats: filteredLanguageStats
     };
   }, [rawMetrics, originalStats, dateRangeFilter]);
 
-  const { metrics, stats, userSummaries, engagementData } = filteredData;
+  const { metrics, stats, userSummaries, engagementData, languageStats } = filteredData;
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -174,6 +178,14 @@ export default function Home() {
           </div>
         )}
 
+        {/* Show Languages View */}
+        {stats && currentView === 'languages' && (
+          <LanguagesView 
+            languages={languageStats} 
+            onBack={() => setCurrentView('overview')} 
+          />
+        )}
+
         {/* Show Unique Users View */}
         {stats && currentView === 'users' && (
           <UniqueUsersView 
@@ -285,7 +297,10 @@ export default function Home() {
                 </div>
               </div>
 
-              <div className="bg-purple-50 rounded-lg p-4 border border-purple-200">
+              <button
+                onClick={() => setCurrentView('languages')}
+                className="bg-purple-50 rounded-lg p-4 border border-purple-200 hover:bg-purple-100 transition-colors text-left group"
+              >
                 <div className="flex items-center">
                   <div className="flex-shrink-0">
                     <svg className="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -293,12 +308,12 @@ export default function Home() {
                     </svg>
                   </div>
                   <div className="ml-4">
-                    <p className="text-sm font-medium text-purple-600">Top Language</p>
+                    <p className="text-sm font-medium text-purple-600 group-hover:text-purple-700">Top Language</p>
                     <p className="text-lg font-bold text-purple-900">{stats.topLanguage?.name || 'N/A'}</p>
                     <p className="text-xs text-purple-700">{stats.topLanguage?.engagements?.toLocaleString() || '0'} engagements</p>
                   </div>
                 </div>
-              </div>
+              </button>
 
               <div className="bg-orange-50 rounded-lg p-4 border border-orange-200">
                 <div className="flex items-center">

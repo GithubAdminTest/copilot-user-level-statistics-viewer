@@ -211,3 +211,58 @@ export function calculateDailyEngagement(metrics: CopilotMetrics[]): DailyEngage
 
   return engagementData;
 }
+
+export interface LanguageStats {
+  language: string;
+  totalGenerations: number;
+  totalAcceptances: number;
+  totalEngagements: number;
+  uniqueUsers: number;
+  generatedLoc: number;
+  acceptedLoc: number;
+}
+
+export function calculateLanguageStats(metrics: CopilotMetrics[]): LanguageStats[] {
+  const languageMap = new Map<string, {
+    totalGenerations: number;
+    totalAcceptances: number;
+    generatedLoc: number;
+    acceptedLoc: number;
+    users: Set<number>;
+  }>();
+
+  for (const metric of metrics) {
+    for (const langFeature of metric.totals_by_language_feature) {
+      const language = langFeature.language;
+      
+      if (!languageMap.has(language)) {
+        languageMap.set(language, {
+          totalGenerations: 0,
+          totalAcceptances: 0,
+          generatedLoc: 0,
+          acceptedLoc: 0,
+          users: new Set()
+        });
+      }
+
+      const langStats = languageMap.get(language)!;
+      langStats.totalGenerations += langFeature.code_generation_activity_count;
+      langStats.totalAcceptances += langFeature.code_acceptance_activity_count;
+      langStats.generatedLoc += langFeature.generated_loc_sum;
+      langStats.acceptedLoc += langFeature.accepted_loc_sum;
+      langStats.users.add(metric.user_id);
+    }
+  }
+
+  return Array.from(languageMap.entries())
+    .map(([language, stats]) => ({
+      language,
+      totalGenerations: stats.totalGenerations,
+      totalAcceptances: stats.totalAcceptances,
+      totalEngagements: stats.totalGenerations + stats.totalAcceptances,
+      uniqueUsers: stats.users.size,
+      generatedLoc: stats.generatedLoc,
+      acceptedLoc: stats.acceptedLoc
+    }))
+    .sort((a, b) => b.totalEngagements - a.totalEngagements);
+}
