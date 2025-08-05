@@ -66,8 +66,12 @@ export function calculateStats(metrics: CopilotMetrics[]): MetricsStats {
     }
   }
   
-  const topLanguageEntry = Array.from(languageEngagements.entries())
-    .sort((a, b) => b[1] - a[1])[0];
+  // Get sorted language entries and skip "unknown"
+  const sortedLanguages = Array.from(languageEngagements.entries())
+    .sort((a, b) => b[1] - a[1])
+    .filter(([language]) => language.toLowerCase() !== 'unknown');
+  
+  const topLanguageEntry = sortedLanguages[0];
   const topLanguage = topLanguageEntry 
     ? { name: topLanguageEntry[0], engagements: topLanguageEntry[1] }
     : { name: 'N/A', engagements: 0 };
