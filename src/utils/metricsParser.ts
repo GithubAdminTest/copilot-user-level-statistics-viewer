@@ -237,6 +237,7 @@ export interface DailyChatUsersData {
   askModeUsers: number;
   agentModeUsers: number;
   editModeUsers: number;
+  inlineModeUsers: number;
 }
 
 export function calculateDailyChatUsers(metrics: CopilotMetrics[]): DailyChatUsersData[] {
@@ -247,6 +248,7 @@ export function calculateDailyChatUsers(metrics: CopilotMetrics[]): DailyChatUse
     askModeUsers: Set<number>;
     agentModeUsers: Set<number>;
     editModeUsers: Set<number>;
+    inlineModeUsers: Set<number>;
   }>();
   
   for (const metric of metrics) {
@@ -255,7 +257,8 @@ export function calculateDailyChatUsers(metrics: CopilotMetrics[]): DailyChatUse
       dailyMetrics.set(date, {
         askModeUsers: new Set(),
         agentModeUsers: new Set(),
-        editModeUsers: new Set()
+        editModeUsers: new Set(),
+        inlineModeUsers: new Set()
       });
     }
     
@@ -272,8 +275,10 @@ export function calculateDailyChatUsers(metrics: CopilotMetrics[]): DailyChatUse
             dayData.agentModeUsers.add(metric.user_id);
             break;
           case 'chat_panel_edit_mode':
-          case 'chat_inline':
             dayData.editModeUsers.add(metric.user_id);
+            break;
+          case 'chat_inline':
+            dayData.inlineModeUsers.add(metric.user_id);
             break;
         }
       }
@@ -286,11 +291,77 @@ export function calculateDailyChatUsers(metrics: CopilotMetrics[]): DailyChatUse
       date,
       askModeUsers: data.askModeUsers.size,
       agentModeUsers: data.agentModeUsers.size,
-      editModeUsers: data.editModeUsers.size
+      editModeUsers: data.editModeUsers.size,
+      inlineModeUsers: data.inlineModeUsers.size
     }))
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
   return chatUsersData;
+}
+
+export interface DailyChatRequestsData {
+  date: string;
+  askModeRequests: number;
+  agentModeRequests: number;
+  editModeRequests: number;
+  inlineModeRequests: number;
+}
+
+export function calculateDailyChatRequests(metrics: CopilotMetrics[]): DailyChatRequestsData[] {
+  if (metrics.length === 0) return [];
+
+  // Group metrics by day and sum requests by chat mode
+  const dailyMetrics = new Map<string, {
+    askModeRequests: number;
+    agentModeRequests: number;
+    editModeRequests: number;
+    inlineModeRequests: number;
+  }>();
+  
+  for (const metric of metrics) {
+    const date = metric.day;
+    if (!dailyMetrics.has(date)) {
+      dailyMetrics.set(date, {
+        askModeRequests: 0,
+        agentModeRequests: 0,
+        editModeRequests: 0,
+        inlineModeRequests: 0
+      });
+    }
+    
+    const dayData = dailyMetrics.get(date)!;
+    
+    // Sum user initiated interactions for each chat mode
+    for (const feature of metric.totals_by_feature) {
+      switch (feature.feature) {
+        case 'chat_panel_ask_mode':
+          dayData.askModeRequests += feature.user_initiated_interaction_count;
+          break;
+        case 'chat_panel_agent_mode':
+          dayData.agentModeRequests += feature.user_initiated_interaction_count;
+          break;
+        case 'chat_panel_edit_mode':
+          dayData.editModeRequests += feature.user_initiated_interaction_count;
+          break;
+        case 'chat_inline':
+          dayData.inlineModeRequests += feature.user_initiated_interaction_count;
+          break;
+      }
+    }
+  }
+
+  // Convert to array and sort by date
+  const chatRequestsData: DailyChatRequestsData[] = Array.from(dailyMetrics.entries())
+    .map(([date, data]) => ({
+      date,
+      askModeRequests: data.askModeRequests,
+      agentModeRequests: data.agentModeRequests,
+      editModeRequests: data.editModeRequests,
+      inlineModeRequests: data.inlineModeRequests
+    }))
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+  return chatRequestsData;
 }
 
 export function calculateLanguageStats(metrics: CopilotMetrics[]): LanguageStats[] {

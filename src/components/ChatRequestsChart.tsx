@@ -13,7 +13,7 @@ import {
   TooltipItem,
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
-import { DailyChatUsersData } from '../utils/metricsParser';
+import { DailyChatRequestsData } from '../utils/metricsParser';
 
 ChartJS.register(
   CategoryScale,
@@ -25,17 +25,17 @@ ChartJS.register(
   Legend
 );
 
-interface ChatUsersChartProps {
-  data: DailyChatUsersData[];
+interface ChatRequestsChartProps {
+  data: DailyChatRequestsData[];
 }
 
-export default function ChatUsersChart({ data }: ChatUsersChartProps) {
+export default function ChatRequestsChart({ data }: ChatRequestsChartProps) {
   if (data.length === 0) {
     return (
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Daily Chat Users Trends</h3>
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">Daily Chat Requests</h3>
         <div className="text-center py-8 text-gray-500">
-          No chat user data available
+          No chat request data available
         </div>
       </div>
     );
@@ -51,8 +51,8 @@ export default function ChatUsersChart({ data }: ChatUsersChartProps) {
     }),
     datasets: [
       {
-        label: 'Chat: Ask Mode',
-        data: data.map(d => d.askModeUsers),
+        label: 'Ask Mode Requests',
+        data: data.map(d => d.askModeRequests),
         borderColor: 'rgb(34, 197, 94)',
         backgroundColor: 'rgba(34, 197, 94, 0.1)',
         borderWidth: 2,
@@ -65,8 +65,8 @@ export default function ChatUsersChart({ data }: ChatUsersChartProps) {
         pointHoverRadius: 6,
       },
       {
-        label: 'Chat: Agent Mode',
-        data: data.map(d => d.agentModeUsers),
+        label: 'Agent Mode Requests',
+        data: data.map(d => d.agentModeRequests),
         borderColor: 'rgb(147, 51, 234)',
         backgroundColor: 'rgba(147, 51, 234, 0.1)',
         borderWidth: 2,
@@ -79,8 +79,8 @@ export default function ChatUsersChart({ data }: ChatUsersChartProps) {
         pointHoverRadius: 6,
       },
       {
-        label: 'Chat: Edit Mode',
-        data: data.map(d => d.editModeUsers),
+        label: 'Edit Mode Requests',
+        data: data.map(d => d.editModeRequests),
         borderColor: 'rgb(245, 158, 11)',
         backgroundColor: 'rgba(245, 158, 11, 0.1)',
         borderWidth: 2,
@@ -93,8 +93,8 @@ export default function ChatUsersChart({ data }: ChatUsersChartProps) {
         pointHoverRadius: 6,
       },
       {
-        label: 'Chat: Inline Mode',
-        data: data.map(d => d.inlineModeUsers),
+        label: 'Inline Mode Requests',
+        data: data.map(d => d.inlineModeRequests),
         borderColor: 'rgb(239, 68, 68)',
         backgroundColor: 'rgba(239, 68, 68, 0.1)',
         borderWidth: 2,
@@ -127,17 +127,17 @@ export default function ChatUsersChart({ data }: ChatUsersChartProps) {
             const datasetLabel = context.dataset.label;
             const value = context.parsed.y;
             
-            return `${datasetLabel}: ${value} users`;
+            return `${datasetLabel}: ${value} requests`;
           },
           afterBody: function(tooltipItems: TooltipItem<'line'>[]) {
             if (tooltipItems.length > 0) {
               const dataIndex = tooltipItems[0].dataIndex;
               const dayData = data[dataIndex];
-              const totalChatUsers = Math.max(dayData.askModeUsers, dayData.agentModeUsers, dayData.editModeUsers, dayData.inlineModeUsers);
+              const totalRequests = dayData.askModeRequests + dayData.agentModeRequests + dayData.editModeRequests + dayData.inlineModeRequests;
               return [
                 '',
                 `Date: ${dayData.date}`,
-                `Peak chat users: ${totalChatUsers}`
+                `Total requests: ${totalRequests}`
               ];
             }
             return [];
@@ -158,7 +158,7 @@ export default function ChatUsersChart({ data }: ChatUsersChartProps) {
       y: {
         title: {
           display: true,
-          text: 'Number of Users',
+          text: 'Number of Requests',
         },
         beginAtZero: true,
         grid: {
@@ -179,48 +179,54 @@ export default function ChatUsersChart({ data }: ChatUsersChartProps) {
   };
 
   // Calculate summary statistics
-  const avgAskMode = data.length > 0 
-    ? Math.round((data.reduce((sum, d) => sum + d.askModeUsers, 0) / data.length) * 100) / 100
+  const totalAskRequests = data.reduce((sum, d) => sum + d.askModeRequests, 0);
+  const totalAgentRequests = data.reduce((sum, d) => sum + d.agentModeRequests, 0);
+  const totalEditRequests = data.reduce((sum, d) => sum + d.editModeRequests, 0);
+  const totalInlineRequests = data.reduce((sum, d) => sum + d.inlineModeRequests, 0);
+  const grandTotal = totalAskRequests + totalAgentRequests + totalEditRequests + totalInlineRequests;
+
+  const avgAskRequests = data.length > 0 
+    ? Math.round((totalAskRequests / data.length) * 100) / 100
     : 0;
 
-  const avgAgentMode = data.length > 0 
-    ? Math.round((data.reduce((sum, d) => sum + d.agentModeUsers, 0) / data.length) * 100) / 100
+  const avgAgentRequests = data.length > 0 
+    ? Math.round((totalAgentRequests / data.length) * 100) / 100
     : 0;
 
-  const avgEditMode = data.length > 0 
-    ? Math.round((data.reduce((sum, d) => sum + d.editModeUsers, 0) / data.length) * 100) / 100
+  const avgEditRequests = data.length > 0 
+    ? Math.round((totalEditRequests / data.length) * 100) / 100
     : 0;
 
-  const avgInlineMode = data.length > 0 
-    ? Math.round((data.reduce((sum, d) => sum + d.inlineModeUsers, 0) / data.length) * 100) / 100
+  const avgInlineRequests = data.length > 0 
+    ? Math.round((totalInlineRequests / data.length) * 100) / 100
     : 0;
 
-  const maxAskMode = data.length > 0 ? Math.max(...data.map(d => d.askModeUsers)) : 0;
-  const maxAgentMode = data.length > 0 ? Math.max(...data.map(d => d.agentModeUsers)) : 0;
-  const maxEditMode = data.length > 0 ? Math.max(...data.map(d => d.editModeUsers)) : 0;
-  const maxInlineMode = data.length > 0 ? Math.max(...data.map(d => d.inlineModeUsers)) : 0;
+  const maxAskRequests = data.length > 0 ? Math.max(...data.map(d => d.askModeRequests)) : 0;
+  const maxAgentRequests = data.length > 0 ? Math.max(...data.map(d => d.agentModeRequests)) : 0;
+  const maxEditRequests = data.length > 0 ? Math.max(...data.map(d => d.editModeRequests)) : 0;
+  const maxInlineRequests = data.length > 0 ? Math.max(...data.map(d => d.inlineModeRequests)) : 0;
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
       <div className="flex justify-between items-start mb-6">
         <div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">Daily Chat Users Trends</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">Daily Chat Requests</h3>
           <p className="text-sm text-gray-600">
-            Number of unique users using different chat modes each day
+            Number of user-initiated chat interactions per mode each day
           </p>
         </div>
         <div className="text-right space-y-1">
           <div className="text-sm text-gray-600">
-            <span className="font-medium">Avg Ask:</span> {avgAskMode}
+            <span className="font-medium">Avg Ask:</span> {avgAskRequests}
           </div>
           <div className="text-sm text-gray-600">
-            <span className="font-medium">Avg Agent:</span> {avgAgentMode}
+            <span className="font-medium">Avg Agent:</span> {avgAgentRequests}
           </div>
           <div className="text-sm text-gray-600">
-            <span className="font-medium">Avg Edit:</span> {avgEditMode}
+            <span className="font-medium">Avg Edit:</span> {avgEditRequests}
           </div>
           <div className="text-sm text-gray-600">
-            <span className="font-medium">Avg Inline:</span> {avgInlineMode}
+            <span className="font-medium">Avg Inline:</span> {avgInlineRequests}
           </div>
         </div>
       </div>
@@ -229,18 +235,21 @@ export default function ChatUsersChart({ data }: ChatUsersChartProps) {
         <Line data={chartData} options={options} />
       </div>
       
-      <div className="mt-4 grid grid-cols-4 gap-4 text-xs text-gray-500">
+      <div className="mt-4 grid grid-cols-5 gap-4 text-xs text-gray-500">
         <div>
-          <span className="font-medium text-green-600">Ask Mode:</span> Max {maxAskMode} users
+          <span className="font-medium text-green-600">Ask Mode:</span> {totalAskRequests} total (max {maxAskRequests}/day)
         </div>
         <div>
-          <span className="font-medium text-purple-600">Agent Mode:</span> Max {maxAgentMode} users
+          <span className="font-medium text-purple-600">Agent Mode:</span> {totalAgentRequests} total (max {maxAgentRequests}/day)
         </div>
         <div>
-          <span className="font-medium text-amber-600">Edit Mode:</span> Max {maxEditMode} users
+          <span className="font-medium text-amber-600">Edit Mode:</span> {totalEditRequests} total (max {maxEditRequests}/day)
         </div>
         <div>
-          <span className="font-medium text-red-600">Inline Mode:</span> Max {maxInlineMode} users
+          <span className="font-medium text-red-600">Inline Mode:</span> {totalInlineRequests} total (max {maxInlineRequests}/day)
+        </div>
+        <div>
+          <span className="font-medium text-gray-600">All Modes:</span> {grandTotal} total requests
         </div>
       </div>
     </div>
