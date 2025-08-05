@@ -274,7 +274,7 @@ export default function Home() {
                   <div className="ml-4">
                     <p className="text-sm font-medium text-orange-600">Top IDE</p>
                     <p className="text-lg font-bold text-orange-900">{stats.topIde?.name || 'N/A'}</p>
-                    <p className="text-xs text-orange-700">{stats.topIde?.entries?.toLocaleString() || '0'} entries</p>
+                    <p className="text-xs text-orange-700">{stats.topIde?.entries?.toLocaleString() || '0'} users</p>
                   </div>
                 </div>
               </div>

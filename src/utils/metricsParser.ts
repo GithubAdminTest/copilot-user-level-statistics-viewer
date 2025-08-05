@@ -72,16 +72,19 @@ export function calculateStats(metrics: CopilotMetrics[]): MetricsStats {
     ? { name: topLanguageEntry[0], engagements: topLanguageEntry[1] }
     : { name: 'N/A', engagements: 0 };
 
-  // Calculate top IDE by number of entries
-  const ideEntries = new Map<string, number>();
+  // Calculate top IDE by number of unique users
+  const ideUsers = new Map<string, Set<number>>();
   for (const metric of metrics) {
     for (const ideTotal of metric.totals_by_ide) {
-      const current = ideEntries.get(ideTotal.ide) || 0;
-      ideEntries.set(ideTotal.ide, current + 1);
+      if (!ideUsers.has(ideTotal.ide)) {
+        ideUsers.set(ideTotal.ide, new Set());
+      }
+      ideUsers.get(ideTotal.ide)!.add(metric.user_id);
     }
   }
   
-  const topIdeEntry = Array.from(ideEntries.entries())
+  const topIdeEntry = Array.from(ideUsers.entries())
+    .map(([ide, userSet]) => [ide, userSet.size] as [string, number])
     .sort((a, b) => b[1] - a[1])[0];
   const topIde = topIdeEntry 
     ? { name: topIdeEntry[0], entries: topIdeEntry[1] }
