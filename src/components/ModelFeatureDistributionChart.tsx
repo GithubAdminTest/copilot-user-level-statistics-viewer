@@ -323,14 +323,14 @@ export default function ModelFeatureDistributionChart({ data }: ModelFeatureDist
         <div className="p-4 bg-red-50 rounded-lg">
           <h4 className="font-semibold text-red-800 mb-2">Premium Feature Usage</h4>
           <p className="text-sm text-red-700">
-            Agent Mode is the most expensive feature due to its advanced capabilities. 
+            Agent Mode is the most advanced feature due to its capabilities. 
             {filteredData.some(d => d.features.agentMode > 0) ? ' Active Agent Mode usage detected.' : ' Consider promoting Agent Mode for complex tasks.'}
           </p>
         </div>
         <div className="p-4 bg-blue-50 rounded-lg">
           <h4 className="font-semibold text-blue-800 mb-2">Cost Optimization</h4>
           <p className="text-sm text-blue-700">
-            {totalCost > 100 ? 'High premium feature usage. Review model selection for cost optimization.' :
+            {totalCost > 100 ? 'High premium feature usage. This is a good utilization of included PRUs.' :
              totalCost > 50 ? 'Moderate premium usage. Good balance of features and cost.' :
              'Efficient use of standard models and features.'}
           </p>
