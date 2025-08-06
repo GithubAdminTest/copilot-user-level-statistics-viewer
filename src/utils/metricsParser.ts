@@ -408,3 +408,383 @@ export function calculateLanguageStats(metrics: CopilotMetrics[]): LanguageStats
     }))
     .sort((a, b) => b.totalEngagements - a.totalEngagements);
 }
+
+// PRU Model Multipliers based on GitHub Copilot documentation
+const MODEL_MULTIPLIERS: Record<string, number> = {
+  // Included models (0 PRUs for paid plans)
+  'gpt-4.1': 0,
+  'gpt-4o': 0,
+  'gpt-4.0': 0,
+  'gpt-4o-latest': 0,
+  
+  // Premium models with multipliers
+  'claude-opus-4': 10,
+  'claude-4.0-sonnet': 1,
+  'claude-3.7-sonnet': 1.25,
+  'claude-3': 1,
+  'claude-3-opus': 10,
+  'claude-3-sonnet': 1,
+  'claude-3-haiku': 1,
+  'claude-2': 1,
+  'gemini-2.0-flash': 0.25,
+  'gemini-2.5-pro': 1,
+  'gemini-pro': 0.33,
+  'gemini': 0.33,
+  
+  // Default multiplier for unknown models
+  'unknown': 1
+};
+
+function getModelMultiplier(modelName: string): number {
+  const normalizedModel = modelName.toLowerCase();
+  
+  // Check for exact matches first
+  if (MODEL_MULTIPLIERS[normalizedModel]) {
+    return MODEL_MULTIPLIERS[normalizedModel];
+  }
+  
+  // Check for partial matches
+  for (const [key, multiplier] of Object.entries(MODEL_MULTIPLIERS)) {
+    if (normalizedModel.includes(key)) {
+      return multiplier;
+    }
+  }
+  
+  // Default for unknown models
+  return MODEL_MULTIPLIERS.unknown;
+}
+
+export interface DailyModelUsageData {
+  date: string;
+  pruModels: number;
+  standardModels: number;
+  unknownModels: number;
+  totalPRUs: number;
+  estimatedCost: number; // At $0.04 per PRU
+}
+
+export function calculateDailyModelUsage(metrics: CopilotMetrics[]): DailyModelUsageData[] {
+  const dailyMetrics = new Map<string, {
+    pruModels: number;
+    standardModels: number;
+    unknownModels: number;
+    totalPRUs: number;
+  }>();
+  
+  for (const metric of metrics) {
+    const date = metric.day;
+    if (!dailyMetrics.has(date)) {
+      dailyMetrics.set(date, {
+        pruModels: 0,
+        standardModels: 0,
+        unknownModels: 0,
+        totalPRUs: 0
+      });
+    }
+    
+    const dayData = dailyMetrics.get(date)!;
+    
+    for (const modelFeature of metric.totals_by_model_feature) {
+      const model = modelFeature.model.toLowerCase();
+      const interactions = modelFeature.user_initiated_interaction_count;
+      const multiplier = getModelMultiplier(model);
+      const prus = interactions * multiplier;
+      
+      dayData.totalPRUs += prus;
+      
+      if (model === 'unknown' || model === '') {
+        dayData.unknownModels += interactions;
+      } else if (multiplier === 0) {
+        dayData.standardModels += interactions;
+      } else {
+        dayData.pruModels += interactions;
+      }
+    }
+  }
+
+  return Array.from(dailyMetrics.entries())
+    .map(([date, data]) => ({
+      date,
+      pruModels: data.pruModels,
+      standardModels: data.standardModels,
+      unknownModels: data.unknownModels,
+      totalPRUs: Math.round(data.totalPRUs * 100) / 100,
+      estimatedCost: Math.round(data.totalPRUs * 0.04 * 100) / 100
+    }))
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+}
+
+export interface FeatureAdoptionData {
+  totalUsers: number;
+  completionUsers: number;
+  chatUsers: number;
+  agentModeUsers: number;
+  askModeUsers: number;
+  editModeUsers: number;
+  inlineModeUsers: number;
+  codeReviewUsers: number;
+  workspaceUsers: number;
+}
+
+export function calculateFeatureAdoption(metrics: CopilotMetrics[]): FeatureAdoptionData {
+  const userFeatures = new Map<number, Set<string>>();
+  
+  for (const metric of metrics) {
+    if (!userFeatures.has(metric.user_id)) {
+      userFeatures.set(metric.user_id, new Set());
+    }
+    
+    const features = userFeatures.get(metric.user_id)!;
+    
+    for (const feature of metric.totals_by_feature) {
+      if (feature.user_initiated_interaction_count > 0 || 
+          feature.code_generation_activity_count > 0) {
+        features.add(feature.feature);
+      }
+    }
+  }
+  
+  let completionUsers = 0;
+  let chatUsers = 0;
+  let agentModeUsers = 0;
+  let askModeUsers = 0;
+  let editModeUsers = 0;
+  let inlineModeUsers = 0;
+  let codeReviewUsers = 0;
+  let workspaceUsers = 0;
+  
+  for (const features of userFeatures.values()) {
+    if (features.has('code_completion')) completionUsers++;
+    if (features.has('chat_panel_unknown_mode') || 
+        features.has('chat_panel_ask_mode') || 
+        features.has('chat_panel_agent_mode') ||
+        features.has('chat_panel_edit_mode')) chatUsers++;
+    if (features.has('chat_panel_agent_mode')) agentModeUsers++;
+    if (features.has('chat_panel_ask_mode')) askModeUsers++;
+    if (features.has('chat_panel_edit_mode')) editModeUsers++;
+    if (features.has('chat_inline')) inlineModeUsers++;
+    if (features.has('code_review')) codeReviewUsers++;
+    if (features.has('chat_panel_workspace_mode')) workspaceUsers++;
+  }
+  
+  return {
+    totalUsers: userFeatures.size,
+    completionUsers,
+    chatUsers,
+    agentModeUsers,
+    askModeUsers,
+    editModeUsers,
+    inlineModeUsers,
+    codeReviewUsers,
+    workspaceUsers
+  };
+}
+
+export interface DailyPRUAnalysisData {
+  date: string;
+  pruRequests: number;
+  standardRequests: number;
+  pruPercentage: number;
+  totalPRUs: number;
+  estimatedCost: number;
+  topModel: string;
+  topModelPRUs: number;
+}
+
+export function calculateDailyPRUAnalysis(metrics: CopilotMetrics[]): DailyPRUAnalysisData[] {
+  const dailyMetrics = new Map<string, {
+    pruRequests: number;
+    standardRequests: number;
+    totalPRUs: number;
+    modelPRUs: Map<string, number>;
+  }>();
+  
+  for (const metric of metrics) {
+    const date = metric.day;
+    if (!dailyMetrics.has(date)) {
+      dailyMetrics.set(date, { 
+        pruRequests: 0, 
+        standardRequests: 0, 
+        totalPRUs: 0,
+        modelPRUs: new Map()
+      });
+    }
+    
+    const dayData = dailyMetrics.get(date)!;
+    
+    for (const modelFeature of metric.totals_by_model_feature) {
+      const model = modelFeature.model.toLowerCase();
+      const count = modelFeature.user_initiated_interaction_count;
+      const multiplier = getModelMultiplier(model);
+      const prus = count * multiplier;
+      
+      dayData.totalPRUs += prus;
+      
+      // Track PRUs by model
+      const currentModelPRUs = dayData.modelPRUs.get(model) || 0;
+      dayData.modelPRUs.set(model, currentModelPRUs + prus);
+      
+      if (multiplier === 0) {
+        dayData.standardRequests += count;
+      } else {
+        dayData.pruRequests += count;
+      }
+    }
+  }
+  
+  return Array.from(dailyMetrics.entries())
+    .map(([date, data]) => {
+      const total = data.pruRequests + data.standardRequests;
+      const topModelEntry = Array.from(data.modelPRUs.entries())
+        .sort((a, b) => b[1] - a[1])[0];
+        
+      return {
+        date,
+        pruRequests: data.pruRequests,
+        standardRequests: data.standardRequests,
+        pruPercentage: total > 0 ? Math.round((data.pruRequests / total) * 100 * 100) / 100 : 0,
+        totalPRUs: Math.round(data.totalPRUs * 100) / 100,
+        estimatedCost: Math.round(data.totalPRUs * 0.04 * 100) / 100,
+        topModel: topModelEntry ? topModelEntry[0] : 'unknown',
+        topModelPRUs: topModelEntry ? Math.round(topModelEntry[1] * 100) / 100 : 0
+      };
+    })
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+}
+
+export interface AgentModeHeatmapData {
+  date: string;
+  agentModeRequests: number;
+  uniqueUsers: number;
+  intensity: number; // 0-5 scale for heatmap coloring
+  pruCost: number;
+}
+
+export function calculateAgentModeHeatmap(metrics: CopilotMetrics[]): AgentModeHeatmapData[] {
+  const dailyMetrics = new Map<string, {
+    requests: number;
+    users: Set<number>;
+    totalPRUs: number;
+  }>();
+  
+  for (const metric of metrics) {
+    const date = metric.day;
+    if (!dailyMetrics.has(date)) {
+      dailyMetrics.set(date, { requests: 0, users: new Set(), totalPRUs: 0 });
+    }
+    
+    const dayData = dailyMetrics.get(date)!;
+    
+    // Check for agent mode usage
+    for (const feature of metric.totals_by_feature) {
+      if (feature.feature === 'chat_panel_agent_mode' && 
+          feature.user_initiated_interaction_count > 0) {
+        dayData.requests += feature.user_initiated_interaction_count;
+        dayData.users.add(metric.user_id);
+      }
+    }
+    
+    // Calculate PRUs from agent mode interactions with specific models
+    for (const modelFeature of metric.totals_by_model_feature) {
+      if (modelFeature.feature === 'chat_panel_agent_mode') {
+        const multiplier = getModelMultiplier(modelFeature.model);
+        dayData.totalPRUs += modelFeature.user_initiated_interaction_count * multiplier;
+      }
+    }
+  }
+  
+  const allRequests = Array.from(dailyMetrics.values()).map(d => d.requests);
+  const maxRequests = Math.max(...allRequests, 1);
+  
+  return Array.from(dailyMetrics.entries())
+    .map(([date, data]) => ({
+      date,
+      agentModeRequests: data.requests,
+      uniqueUsers: data.users.size,
+      intensity: Math.ceil((data.requests / maxRequests) * 5),
+      pruCost: Math.round(data.totalPRUs * 0.04 * 100) / 100
+    }))
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+}
+
+export interface ModelFeatureDistributionData {
+  model: string;
+  modelDisplayName: string;
+  multiplier: number;
+  features: {
+    agentMode: number;
+    askMode: number;
+    editMode: number;
+    inlineMode: number;
+    codeCompletion: number;
+    codeReview: number;
+    workspace: number;
+    other: number;
+  };
+  totalInteractions: number;
+  totalPRUs: number;
+  estimatedCost: number;
+}
+
+export function calculateModelFeatureDistribution(metrics: CopilotMetrics[]): ModelFeatureDistributionData[] {
+  const modelMap = new Map<string, {
+    features: Map<string, number>;
+    totalInteractions: number;
+  }>();
+  
+  for (const metric of metrics) {
+    for (const modelFeature of metric.totals_by_model_feature) {
+      const model = modelFeature.model.toLowerCase();
+      
+      if (!modelMap.has(model)) {
+        modelMap.set(model, {
+          features: new Map(),
+          totalInteractions: 0
+        });
+      }
+      
+      const modelData = modelMap.get(model)!;
+      const currentFeatureCount = modelData.features.get(modelFeature.feature) || 0;
+      modelData.features.set(modelFeature.feature, currentFeatureCount + modelFeature.user_initiated_interaction_count);
+      modelData.totalInteractions += modelFeature.user_initiated_interaction_count;
+    }
+  }
+  
+  return Array.from(modelMap.entries())
+    .map(([model, data]) => {
+      const multiplier = getModelMultiplier(model);
+      const totalPRUs = data.totalInteractions * multiplier;
+      
+      // Map features to standardized categories
+      const features = {
+        agentMode: data.features.get('chat_panel_agent_mode') || 0,
+        askMode: data.features.get('chat_panel_ask_mode') || 0,
+        editMode: data.features.get('chat_panel_edit_mode') || 0,
+        inlineMode: data.features.get('chat_inline') || 0,
+        codeCompletion: data.features.get('code_completion') || 0,
+        codeReview: data.features.get('code_review') || 0,
+        workspace: data.features.get('chat_panel_workspace_mode') || 0,
+        other: 0
+      };
+      
+      // Calculate "other" features
+      const knownFeatureTotal = Object.values(features).reduce((sum, count) => sum + count, 0);
+      features.other = Math.max(0, data.totalInteractions - knownFeatureTotal);
+      
+      // Create display name
+      const modelDisplayName = model === 'unknown' ? 'Unknown Model' : 
+        model.charAt(0).toUpperCase() + model.slice(1).replace(/-/g, ' ');
+      
+      return {
+        model,
+        modelDisplayName,
+        multiplier,
+        features,
+        totalInteractions: data.totalInteractions,
+        totalPRUs: Math.round(totalPRUs * 100) / 100,
+        estimatedCost: Math.round(totalPRUs * 0.04 * 100) / 100
+      };
+    })
+    .filter(item => item.totalInteractions > 0)
+    .sort((a, b) => b.totalPRUs - a.totalPRUs);
+}

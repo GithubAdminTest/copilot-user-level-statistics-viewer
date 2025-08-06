@@ -2,7 +2,21 @@
 
 import { useState, useMemo } from 'react';
 import { CopilotMetrics, MetricsStats } from '../types/metrics';
-import { parseMetricsFile, calculateStats, calculateUserSummaries, calculateDailyEngagement, calculateDailyChatUsers, calculateDailyChatRequests, calculateLanguageStats, filterUnknownLanguages } from '../utils/metricsParser';
+import { 
+  parseMetricsFile, 
+  calculateStats, 
+  calculateUserSummaries, 
+  calculateDailyEngagement, 
+  calculateDailyChatUsers, 
+  calculateDailyChatRequests, 
+  calculateLanguageStats, 
+  filterUnknownLanguages,
+  calculateDailyModelUsage,
+  calculateFeatureAdoption,
+  calculateDailyPRUAnalysis,
+  calculateAgentModeHeatmap,
+  calculateModelFeatureDistribution
+} from '../utils/metricsParser';
 import { filterMetricsByDateRange, getFilteredDateRange } from '../utils/dateFilters';
 import UniqueUsersView from '../components/UniqueUsersView';
 import UserDetailsView from '../components/UserDetailsView';
@@ -11,6 +25,11 @@ import IDEView from '../components/IDEView';
 import EngagementChart from '../components/EngagementChart';
 import ChatUsersChart from '../components/ChatUsersChart';
 import ChatRequestsChart from '../components/ChatRequestsChart';
+import PRUModelUsageChart from '../components/PRUModelUsageChart';
+import FeatureAdoptionChart from '../components/FeatureAdoptionChart';
+import PRUCostAnalysisChart from '../components/PRUCostAnalysisChart';
+import AgentModeHeatmapChart from '../components/AgentModeHeatmapChart';
+import ModelFeatureDistributionChart from '../components/ModelFeatureDistributionChart';
 import FilterPanel, { DateRangeFilter } from '../components/FilterPanel';
 
 type ViewMode = 'overview' | 'users' | 'userDetails' | 'languages' | 'ides';
@@ -39,7 +58,12 @@ export default function Home() {
         engagementData: [],
         chatUsersData: [],
         chatRequestsData: [],
-        languageStats: []
+        languageStats: [],
+        modelUsageData: [],
+        featureAdoptionData: null,
+        pruAnalysisData: [],
+        agentModeHeatmapData: [],
+        modelFeatureDistributionData: []
       };
     }
 
@@ -54,6 +78,13 @@ export default function Home() {
     const filteredChatUsersData = calculateDailyChatUsers(filteredMetrics);
     const filteredChatRequestsData = calculateDailyChatRequests(filteredMetrics);
     const filteredLanguageStats = calculateLanguageStats(filteredMetrics);
+    
+    // Calculate PRU analysis data
+    const filteredModelUsageData = calculateDailyModelUsage(filteredMetrics);
+    const filteredFeatureAdoptionData = calculateFeatureAdoption(filteredMetrics);
+    const filteredPRUAnalysisData = calculateDailyPRUAnalysis(filteredMetrics);
+    const filteredAgentModeHeatmapData = calculateAgentModeHeatmap(filteredMetrics);
+    const filteredModelFeatureDistributionData = calculateModelFeatureDistribution(filteredMetrics);
 
     // Update the date range in stats based on filter
     const { startDay, endDay } = getFilteredDateRange(dateRangeFilter, originalStats.reportStartDay, originalStats.reportEndDay);
@@ -70,11 +101,29 @@ export default function Home() {
       engagementData: filteredEngagementData,
       chatUsersData: filteredChatUsersData,
       chatRequestsData: filteredChatRequestsData,
-      languageStats: filteredLanguageStats
+      languageStats: filteredLanguageStats,
+      modelUsageData: filteredModelUsageData,
+      featureAdoptionData: filteredFeatureAdoptionData,
+      pruAnalysisData: filteredPRUAnalysisData,
+      agentModeHeatmapData: filteredAgentModeHeatmapData,
+      modelFeatureDistributionData: filteredModelFeatureDistributionData
     };
   }, [rawMetrics, originalStats, dateRangeFilter, removeUnknownLanguages]);
 
-  const { metrics, stats, userSummaries, engagementData, chatUsersData, chatRequestsData, languageStats } = filteredData;
+  const { 
+    metrics, 
+    stats, 
+    userSummaries, 
+    engagementData, 
+    chatUsersData, 
+    chatRequestsData, 
+    languageStats,
+    modelUsageData,
+    featureAdoptionData,
+    pruAnalysisData,
+    agentModeHeatmapData,
+    modelFeatureDistributionData
+  } = filteredData;
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -413,6 +462,57 @@ export default function Home() {
             {/* Daily Chat Requests Chart */}
             <div className="mt-8">
               <ChatRequestsChart data={chatRequestsData} />
+            </div>
+
+            {/* PRU Analysis Section */}
+            <div className="mt-8">
+              <div className="mb-6">
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">Premium Request Units (PRU) Analysis</h3>
+                <p className="text-gray-600 text-sm">
+                  Analyze premium model usage, costs, and feature adoption patterns. Premium models like Claude and Gemini consume PRUs.
+                </p>
+                {/* Debug info */}
+                <div className="text-xs text-gray-500 mt-2">
+                  Model Usage Data: {modelUsageData?.length || 0} records, 
+                  Feature Adoption: {featureAdoptionData ? 'Available' : 'Not available'},
+                  PRU Analysis: {pruAnalysisData?.length || 0} records
+                </div>
+              </div>
+              
+              {/* PRU Model Usage Chart */}
+              <div className="mb-8">
+                <PRUModelUsageChart data={modelUsageData || []} />
+              </div>
+
+              {/* Feature Adoption Chart */}
+              <div className="mb-8">
+                <FeatureAdoptionChart data={featureAdoptionData || {
+                  totalUsers: 0,
+                  completionUsers: 0,
+                  chatUsers: 0,
+                  agentModeUsers: 0,
+                  askModeUsers: 0,
+                  editModeUsers: 0,
+                  inlineModeUsers: 0,
+                  codeReviewUsers: 0,
+                  workspaceUsers: 0
+                }} />
+              </div>
+
+              {/* PRU Cost Analysis Chart */}
+              <div className="mb-8">
+                <PRUCostAnalysisChart data={pruAnalysisData || []} />
+              </div>
+
+              {/* Agent Mode Heatmap Chart */}
+              <div className="mb-8">
+                <AgentModeHeatmapChart data={agentModeHeatmapData || []} />
+              </div>
+
+              {/* Model Feature Distribution Chart */}
+              <div className="mb-8">
+                <ModelFeatureDistributionChart data={modelFeatureDistributionData || []} />
+              </div>
             </div>
 
             <div className="mt-8 p-4 bg-gray-50 rounded-lg">
