@@ -74,7 +74,7 @@ export default function PRUCostAnalysisChart({ data }: PRUCostAnalysisChartProps
             },
             {
               type: 'line' as const,
-              label: 'Estimated Cost ($)',
+              label: 'Service Value ($)',
               data: data.map(d => d.serviceValue),
               backgroundColor: 'rgba(147, 51, 234, 0.2)',
               borderColor: 'rgb(147, 51, 234)',

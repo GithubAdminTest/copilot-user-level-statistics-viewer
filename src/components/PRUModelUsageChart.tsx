@@ -196,7 +196,7 @@ export default function PRUModelUsageChart({ data }: PRUModelUsageChartProps) {
         </div>
         <div className="text-center">
           <div className="text-2xl font-bold text-purple-600">${Math.round(totalCost * 100) / 100}</div>
-          <div className="text-sm text-gray-600">Estimated Cost</div>
+          <div className="text-sm text-gray-600">Service Value</div>
           <div className="text-xs text-gray-500">
             Avg: ${data.length > 0 ? Math.round((totalCost / data.length) * 100) / 100 : 0}/day
           </div>
