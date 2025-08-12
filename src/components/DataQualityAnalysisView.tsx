@@ -57,7 +57,8 @@ export default function DataQualityAnalysisView({ metrics, onBack }: DataQuality
           'chat_panel_agent_mode',
           'chat_panel_ask_mode',
           'chat_panel_custom_mode',
-          'chat_panel_edit_mode'
+          'chat_panel_edit_mode',
+          'chat_inline'
         ].includes(featureName)) {
           userEntry.modes.add(featureName);
           
@@ -92,7 +93,7 @@ export default function DataQualityAnalysisView({ metrics, onBack }: DataQuality
   const usersToShow = isTableExpanded ? usersWithDataQualityIssues : usersWithDataQualityIssues.slice(0, maxItemsToShow);
 
   const formatModes = (modes: string[]): string => {
-    return modes.map(mode => mode.replace('chat_panel_', '').replace('_mode', '')).join(', ');
+    return modes.join(', ');
   };
 
   return (
