@@ -197,8 +197,8 @@ export default function DataQualityAnalysisView({ metrics, onBack }: DataQuality
         <h4 className="text-sm font-medium text-blue-900 mb-2">Analysis Notes:</h4>
         <ul className="text-sm text-blue-800 space-y-1">
           <li>• Users shown have <code>used_agent: true</code> but no <code>chat_panel_agent_mode</code> feature usage reported</li>
-          <li>• This indicates a data quality issue where the agent flag is set but features don't reflect agent mode usage</li>
-          <li>• These users may be using agent mode but it's not being properly tracked in the feature metrics</li>
+          <li>• This indicates a data quality issue where the agent flag is set but features don&apos;t reflect agent mode usage</li>
+          <li>• These users may be using agent mode but it&apos;s not being properly tracked in the feature metrics</li>
         </ul>
       </div>
     </div>

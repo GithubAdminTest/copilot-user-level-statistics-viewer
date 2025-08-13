@@ -20,6 +20,10 @@ This workspace contains a Next.js TypeScript single page application.
 - **No explicit `any` types**: Always use proper TypeScript types instead of `any` to prevent `@typescript-eslint/no-explicit-any` errors
   - For Chart.js tooltip callbacks, use `TooltipItem<'bar' | 'pie'>` from `chart.js` instead of `any`
   - Import specific types: `import { TooltipItem } from 'chart.js'`
+- **Escape entities in JSX**: Use proper HTML entities for special characters to prevent `react/no-unescaped-entities` errors
+  - Use `&apos;` or `&#39;` for apostrophes/single quotes
+  - Use `&quot;` for double quotes
+  - Use `&amp;` for ampersands
 - **Always run `npm run build` before committing** to catch TypeScript and ESLint issues early
 - **Prefer specific imports**: Import only the types and components you need
 
