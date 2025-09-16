@@ -9,6 +9,7 @@ export const featureTranslations: Record<string, string> = {
   'code_completion': 'Code Completion',
   'chat_panel_unknown_mode': 'Chat: Unknown Mode',
   'chat_inline': 'Chat: Inline',
+  'agent_edit': 'Agent Edit',
 };
 
 /**
