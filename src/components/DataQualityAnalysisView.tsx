@@ -8,6 +8,7 @@ interface DataQualityUser {
   userId: number;
   usedAgent: boolean;
   usedModes: string[];
+  pluginsUsed: string[];
 }
 
 interface DataQualityAnalysisViewProps {
@@ -26,6 +27,7 @@ export default function DataQualityAnalysisView({ metrics, onBack }: DataQuality
       modes: Set<string>; 
       usedAgent: boolean;
       hasAgentModeFeature: boolean;
+      plugins: Map<string, string>; // plugin name -> latest version
     }>();
 
     // Scan through all metrics to collect user modes and agent usage
@@ -38,7 +40,8 @@ export default function DataQualityAnalysisView({ metrics, onBack }: DataQuality
           userLogin: metric.user_login,
           modes: new Set<string>(),
           usedAgent: false,
-          hasAgentModeFeature: false
+          hasAgentModeFeature: false,
+          plugins: new Map<string, string>()
         });
       }
 
@@ -58,13 +61,24 @@ export default function DataQualityAnalysisView({ metrics, onBack }: DataQuality
           'chat_panel_ask_mode',
           'chat_panel_custom_mode',
           'chat_panel_edit_mode',
-          'chat_inline'
+          'chat_inline',
+          'agent_edit'
         ].includes(featureName)) {
           userEntry.modes.add(featureName);
           
           // Check if user has agent mode feature reported
-          if (featureName === 'chat_panel_agent_mode') {
+          if (featureName === 'chat_panel_agent_mode' || featureName === 'agent_edit') {
             userEntry.hasAgentModeFeature = true;
+          }
+        }
+      });
+
+      // Collect plugin information from totals_by_ide
+      metric.totals_by_ide?.forEach(ide => {
+        if (ide.last_known_plugin_version) {
+          const { plugin, plugin_version } = ide.last_known_plugin_version;
+          if (plugin && plugin_version) {
+            userEntry.plugins.set(plugin, plugin_version);
           }
         }
       });
@@ -79,7 +93,10 @@ export default function DataQualityAnalysisView({ metrics, onBack }: DataQuality
           userLogin: user.userLogin,
           userId: user.userId,
           usedAgent: user.usedAgent,
-          usedModes: Array.from(user.modes).sort()
+          usedModes: Array.from(user.modes).sort(),
+          pluginsUsed: Array.from(user.plugins.entries())
+            .map(([plugin, version]) => `${plugin} (v${version})`)
+            .sort()
         });
       }
     });
@@ -94,6 +111,10 @@ export default function DataQualityAnalysisView({ metrics, onBack }: DataQuality
 
   const formatModes = (modes: string[]): string => {
     return modes.join(', ');
+  };
+
+  const formatPlugins = (plugins: string[]): string => {
+    return plugins.length > 0 ? plugins.join(', ') : 'None';
   };
 
   return (
@@ -154,6 +175,9 @@ export default function DataQualityAnalysisView({ metrics, onBack }: DataQuality
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Chat Modes Used
                 </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Plugins Used
+                </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -173,6 +197,11 @@ export default function DataQualityAnalysisView({ metrics, onBack }: DataQuality
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-900">
                       {user.usedModes.length > 0 ? formatModes(user.usedModes) : 'None'}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-900">
+                      {formatPlugins(user.pluginsUsed)}
                     </div>
                   </td>
                 </tr>
@@ -196,7 +225,7 @@ export default function DataQualityAnalysisView({ metrics, onBack }: DataQuality
       <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
         <h4 className="text-sm font-medium text-blue-900 mb-2">Analysis Notes:</h4>
         <ul className="text-sm text-blue-800 space-y-1">
-          <li>• Users shown have <code>used_agent: true</code> but no <code>chat_panel_agent_mode</code> feature usage reported</li>
+          <li>• Users shown have <code>used_agent: true</code> but no <code>chat_panel_agent_mode</code> or <code>agent_edit</code> feature usage reported</li>
           <li>• This indicates a data quality issue where the agent flag is set but features don&apos;t reflect agent mode usage</li>
           <li>• These users may be using agent mode but it&apos;s not being properly tracked in the feature metrics</li>
         </ul>

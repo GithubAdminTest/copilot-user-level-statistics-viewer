@@ -148,7 +148,7 @@ export default function CodingAgentImpactChart({ data }: CodingAgentImpactChartP
       <div className="flex justify-between items-start mb-6">
         <div>
           <h3 className="text-lg font-semibold text-gray-900 mb-2">
-            Copilot Agent Mode Impact ({uniqueUsers} Unique Users)
+            Copilot Agent Mode Impact ({uniqueUsers} Unique Users) 
           </h3>
           <p className="text-sm text-gray-600">
             Daily lines of code added and deleted through Copilot Agent Mode
