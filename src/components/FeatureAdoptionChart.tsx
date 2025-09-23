@@ -190,7 +190,7 @@ export default function FeatureAdoptionChart({ data }: FeatureAdoptionChartProps
         <div className="p-4 bg-blue-50 rounded-lg">
           <h4 className="font-semibold text-blue-800 mb-2">Premium Features</h4>
           <p className="text-sm text-blue-700">
-            Agent Mode is a premium feature that consumes PRUs. 
+            Agent Mode is a advanced feature that can drive significant value for users. 
             {agentRate > 15 ? ' High adoption suggests good value perception.' : ' Consider promoting Agent Mode benefits to increase adoption.'}
           </p>
         </div>
