@@ -315,6 +315,7 @@ export default function Home() {
           <CopilotAdoptionView
             featureAdoptionData={featureAdoptionData}
             agentModeHeatmapData={agentModeHeatmapData}
+            stats={stats}
             onBack={() => setCurrentView('overview')}
           />
         )}
@@ -372,30 +373,6 @@ export default function Home() {
                 icon={<svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>}
               />
               <MetricTile
-                title="Chat Users"
-                value={stats.chatUsers}
-                accent="emerald"
-                subtitle={`Out of ${stats.uniqueUsers.toLocaleString()} unique users`}
-                icon={<svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>}
-              />
-              <MetricTile
-                title="Agent Mode Users"
-                value={stats.agentUsers}
-                accent="violet"
-                subtitle={`Out of ${stats.uniqueUsers.toLocaleString()} unique users`}
-                icon={<svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>}
-              />
-              <MetricTile
-                title="Completion Only Users"
-                value={stats.completionOnlyUsers}
-                accent="amber"
-                subtitle={`Out of ${stats.uniqueUsers.toLocaleString()} unique users`}
-                icon={<svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" /></svg>}
-              />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-6 mt-6">
-              <MetricTile
                 title="Unique Users"
                 value={stats.uniqueUsers}
                 accent="blue"
@@ -423,19 +400,9 @@ export default function Home() {
                 size="md"
                 icon={<svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>}
               />
-              <MetricTile
-                title="Top Model"
-                value={stats.topModel?.name || 'N/A'}
-                subtitle={`${stats.topModel?.engagements?.toLocaleString() || '0'} engagements`}
-                accent="indigo"
-                size="md"
-                icon={<svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" /></svg>}
-                showArrow={false}
-              />
             </div>
 
-            {/* Additional Analysis Tiles Row */}
-            <div className="grid grid-cols-1 md:grid-cols-4 xl:grid-cols-4 gap-6 mt-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-6 mt-6">
               <MetricTile
                 title="Copilot Impact"
                 value={'Insights'}
@@ -462,6 +429,15 @@ export default function Home() {
                 interactive
                 onClick={() => setCurrentView('copilotAdoption')}
                 icon={<svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>}
+              />
+              <MetricTile
+                title="Top Model"
+                value={stats.topModel?.name || 'N/A'}
+                subtitle={`${stats.topModel?.engagements?.toLocaleString() || '0'} engagements`}
+                accent="indigo"
+                size="md"
+                icon={<svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" /></svg>}
+                showArrow={false}
               />
             </div>
 
