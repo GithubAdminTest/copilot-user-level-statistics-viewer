@@ -29,6 +29,8 @@ export default function CopilotAdoptionView({ featureAdoptionData, agentModeHeat
   const [expandedUsernames, setExpandedUsernames] = useState<Set<string>>(new Set());
   // Collapsible state for outdated plugins table (progressive disclosure)
   const [isOutdatedPluginsExpanded, setIsOutdatedPluginsExpanded] = useState(false);
+  // Collapsible state for latest plugin versions table (show 2 by default)
+  const [isLatestVersionsExpanded, setIsLatestVersionsExpanded] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -264,7 +266,7 @@ export default function CopilotAdoptionView({ featureAdoptionData, agentModeHeat
                   {(
                     isOutdatedPluginsExpanded
                       ? outdatedPlugins
-                      : outdatedPlugins.slice(0, 10)
+                      : outdatedPlugins.slice(0, 5)
                   ).map((plugin) => {
                     const cdate = jetbrainsVersionDateMap.get(plugin.version);
                     const releaseDate = cdate ? formatDate(cdate) : 'N/A';
@@ -310,7 +312,7 @@ export default function CopilotAdoptionView({ featureAdoptionData, agentModeHeat
                   })}
                 </tbody>
               </table>
-              {outdatedPlugins.length > 10 && (
+              {outdatedPlugins.length > 5 && (
                 <div className="mt-4 text-center">
                   <button
                     onClick={() => setIsOutdatedPluginsExpanded(e => !e)}
@@ -331,7 +333,7 @@ export default function CopilotAdoptionView({ featureAdoptionData, agentModeHeat
         </div>
         )}
 
-        {/* Latest 8 Versions Table */}
+        {/* Latest 8 Versions Table (Collapsible: show 2 by default) */}
         <div className="mb-8">
           <h4 className="text-md font-semibold text-gray-800 mb-3">Latest 8 Plugin Versions</h4>
           <div className="overflow-x-auto border border-gray-200 rounded-md">
@@ -358,14 +360,27 @@ export default function CopilotAdoptionView({ featureAdoptionData, agentModeHeat
                     <td className="px-4 py-3 text-gray-500" colSpan={2}>No version data available.</td>
                   </tr>
                 )}
-                {!jbLoading && !jbError && latestEightUpdates.map(update => (
-                  <tr key={update.id} className="hover:bg-gray-50">
-                    <td className="px-4 py-2 font-mono text-gray-900 whitespace-nowrap">{update.version}</td>
-                    <td className="px-4 py-2 text-gray-700 whitespace-nowrap">{formatDate(update.cdate)}</td>
-                  </tr>
-                ))}
+                {!jbLoading && !jbError && (
+                  (isLatestVersionsExpanded ? latestEightUpdates : latestEightUpdates.slice(0, 2)).map(update => (
+                    <tr key={update.id} className="hover:bg-gray-50">
+                      <td className="px-4 py-2 font-mono text-gray-900 whitespace-nowrap">{update.version}</td>
+                      <td className="px-4 py-2 text-gray-700 whitespace-nowrap">{formatDate(update.cdate)}</td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
+            {!jbLoading && !jbError && latestEightUpdates.length > 2 && (
+              <div className="mt-4 text-center">
+                <button
+                  onClick={() => setIsLatestVersionsExpanded(e => !e)}
+                  className="px-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-800 border border-blue-300 hover:border-blue-400 rounded-md transition-colors"
+                  aria-expanded={isLatestVersionsExpanded}
+                >
+                  {isLatestVersionsExpanded ? 'Show Less' : `Show All ${latestEightUpdates.length} Versions`}
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
