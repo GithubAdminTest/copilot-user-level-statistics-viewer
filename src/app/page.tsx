@@ -329,29 +329,19 @@ export default function Home() {
               </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-6">
-              <button
-                onClick={() => setCurrentView('users')}
-                className="bg-blue-50 rounded-lg p-4 border border-blue-200 hover:bg-blue-100 transition-colors text-left group"
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    <div className="flex-shrink-0">
-                      <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
-                      </svg>
-                    </div>
-                    <div className="ml-4">
-                      <p className="text-sm font-medium text-blue-600 group-hover:text-blue-700">Unique Users</p>
-                      <p className="text-2xl font-bold text-blue-900">{stats.uniqueUsers.toLocaleString()}</p>
-                    </div>
-                  </div>
+              <div className="bg-green-50 rounded-lg p-4 border border-green-200">
+                <div className="flex items-center">
                   <div className="flex-shrink-0">
-                    <svg className="w-6 h-6 text-blue-500 group-hover:text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
                   </div>
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-green-600">Total Records</p>
+                    <p className="text-2xl font-bold text-green-900">{stats.totalRecords.toLocaleString()}</p>
+                  </div>
                 </div>
-              </button>
+              </div>
 
               <div className="bg-emerald-50 rounded-lg p-4 border border-emerald-200">
                 <div className="flex items-center">
@@ -400,19 +390,29 @@ export default function Home() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-6 mt-6">
-              <div className="bg-green-50 rounded-lg p-4 border border-green-200">
-                <div className="flex items-center">
+              <button
+                onClick={() => setCurrentView('users')}
+                className="bg-blue-50 rounded-lg p-4 border border-blue-200 hover:bg-blue-100 transition-colors text-left group"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <div className="flex-shrink-0">
+                      <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+                      </svg>
+                    </div>
+                    <div className="ml-4">
+                      <p className="text-sm font-medium text-blue-600 group-hover:text-blue-700">Unique Users</p>
+                      <p className="text-2xl font-bold text-blue-900">{stats.uniqueUsers.toLocaleString()}</p>
+                    </div>
+                  </div>
                   <div className="flex-shrink-0">
-                    <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    <svg className="w-6 h-6 text-blue-500 group-hover:text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                     </svg>
                   </div>
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-green-600">Total Records</p>
-                    <p className="text-2xl font-bold text-green-900">{stats.totalRecords.toLocaleString()}</p>
-                  </div>
                 </div>
-              </div>
+              </button>
 
               <button
                 onClick={() => setCurrentView('languages')}
