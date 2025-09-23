@@ -459,9 +459,13 @@ export function calculateLanguageStats(metrics: CopilotMetrics[]): LanguageStats
 const MODEL_MULTIPLIERS: Record<string, number> = {
   // Included models (0 PRUs for paid plans)
   'gpt-4.1': 0,
+  'gpt-3.5': 0,
   'gpt-4o': 0,
   'gpt-4.0': 0,
   'gpt-4o-latest': 0,
+  'gpt-5-mini': 0,
+  'grok-code-fast': 0,
+
   
   // Premium models with multipliers
   'claude-opus-4': 10,
@@ -476,6 +480,7 @@ const MODEL_MULTIPLIERS: Record<string, number> = {
   'gemini-2.5-pro': 1,
   'gemini-pro': 0.33,
   'gemini': 0.33,
+  'gpt-5': 1,
   
   // Default multiplier for unknown models
   'unknown': 1
