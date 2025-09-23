@@ -146,7 +146,7 @@ export default function UserDetailsView({ userMetrics, userLogin, userId, onBack
   const MODEL_MULTIPLIERS: Record<string, number> = {
     'gpt-4.1': 0, 'gpt-4o': 0, 'gpt-4.0': 0, 'gpt-4o-latest': 0,
     'claude-opus-4': 10, 'claude-4.0-sonnet': 1, 'claude-3.7-sonnet': 1.25,
-    'claude-3': 1, 'claude-3-opus': 10, 'claude-3-sonnet': 1, 'claude-3-haiku': 1, 'claude-2': 1,
+    'claude-3': 1, 'claude-3-opus': 10, 'claude-3-sonnet': 1, 'claude-3-haiku': 1, 'claude-2': 1, 'gpt-5': 1,
     'gemini-2.0-flash': 0.25, 'gemini-2.5-pro': 1, 'gemini-pro': 0.33, 'gemini': 0.33,
     'unknown': 1
   };
