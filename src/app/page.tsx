@@ -27,8 +27,7 @@ import IDEView from '../components/IDEView';
 import EngagementChart from '../components/EngagementChart';
 import ChatUsersChart from '../components/ChatUsersChart';
 import ChatRequestsChart from '../components/ChatRequestsChart';
-import FeatureAdoptionChart from '../components/FeatureAdoptionChart';
-import AgentModeHeatmapChart from '../components/AgentModeHeatmapChart';
+import CopilotAdoptionView from '../components/CopilotAdoptionView';
 import PRUUsageAnalysisView from '../components/PRUUsageAnalysisView';
 import CopilotImpactView from '../components/CopilotImpactView';
 import DataQualityAnalysisView from '../components/DataQualityAnalysisView';
@@ -36,7 +35,7 @@ import FilterPanel, { DateRangeFilter } from '../components/FilterPanel';
 import MetricTile from '../components/MetricTile';
 import { useMetricsData } from '../components/MetricsContext';
 
-type ViewMode = 'overview' | 'users' | 'userDetails' | 'languages' | 'ides' | 'dataQuality' | 'copilotImpact' | 'pruUsage';
+type ViewMode = 'overview' | 'users' | 'userDetails' | 'languages' | 'ides' | 'dataQuality' | 'copilotImpact' | 'pruUsage' | 'copilotAdoption';
 
 export default function Home() {
   // Publish filtered metrics to context so other pages (e.g., Copilot Impact Analysis) can consume.
@@ -310,6 +309,15 @@ export default function Home() {
           />
         )}
 
+        {/* Show Copilot Adoption Analysis View */}
+        {stats && currentView === 'copilotAdoption' && (
+          <CopilotAdoptionView
+            featureAdoptionData={featureAdoptionData}
+            agentModeHeatmapData={agentModeHeatmapData}
+            onBack={() => setCurrentView('overview')}
+          />
+        )}
+
         {/* Show Unique Users View */}
         {stats && currentView === 'users' && (
           <UniqueUsersView 
@@ -445,6 +453,15 @@ export default function Home() {
                 onClick={() => setCurrentView('pruUsage')}
                 icon={<svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h18M9 7h12M9 11h12M9 15h12M3 7h.01M3 11h.01M3 15h.01M9 19h12M3 19h.01" /></svg>}
               />
+              <MetricTile
+                title="Copilot Adoption Analysis"
+                value={'Insights'}
+                subtitle="Understand Copilot Adoption in your organization"
+                accent="violet"
+                interactive
+                onClick={() => setCurrentView('copilotAdoption')}
+                icon={<svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>}
+              />
             </div>
 
             {/* Daily Engagement Chart */}
@@ -463,38 +480,6 @@ export default function Home() {
             </div>
 
 
-            {/* PRU Analysis Section (reduced after moving detailed charts to dedicated view) */}
-            <div className="mt-8">
-              <div className="mb-6">
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">Premium Request Units (PRU) Analysis</h3>
-                <p className="text-gray-600 text-sm">
-                  Analyze premium model usage, service value, and feature adoption patterns. Premium models like Claude and Gemini consume PRUs, representing the value of enhanced AI services provided.
-                </p>
-                {/* Debug info */}
-                <div className="text-xs text-gray-500 mt-2">
-                  Model Usage Data: {modelUsageData?.length || 0} records, 
-                  Feature Adoption: {featureAdoptionData ? 'Available' : 'Not available'},
-                  PRU Analysis: {pruAnalysisData?.length || 0} records
-                </div>
-              </div>
-              {/* Feature Adoption Chart */}
-              <div className="mb-8 w-full">
-                <FeatureAdoptionChart data={featureAdoptionData || {
-                  totalUsers: 0,
-                  completionUsers: 0,
-                  chatUsers: 0,
-                  agentModeUsers: 0,
-                  askModeUsers: 0,
-                  editModeUsers: 0,
-                  inlineModeUsers: 0,
-                  codeReviewUsers: 0
-                }} />
-              </div>
-              {/* Agent Mode Heatmap Chart */}
-              <div className="mb-8 w-full">
-                <AgentModeHeatmapChart data={agentModeHeatmapData || []} />
-              </div>
-            </div>
 
             </div>
 

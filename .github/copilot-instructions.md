@@ -76,9 +76,4 @@ const itemsToShow = isTableExpanded ? allItems : allItems.slice(0, maxItemsToSho
 - **Language Statistics**: Show top 10 languages, expand to see all
 - **Complete Data Tables**: Show top 10 rows, expand to see all entries
 
-#### Benefits:
-- **Performance**: Reduces initial render time for large datasets
-- **Usability**: Presents most important information first
-- **Scalability**: Handles datasets of any size gracefully
-- **Consistency**: Uniform behavior across all data views
 
