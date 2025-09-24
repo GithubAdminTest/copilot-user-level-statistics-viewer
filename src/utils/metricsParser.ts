@@ -1,4 +1,5 @@
 import { CopilotMetrics, MetricsStats, UserSummary } from '../types/metrics';
+import { SERVICE_VALUE_RATE, getModelMultiplier } from '../domain/modelConfig';
 
 export function parseMetricsFile(fileContent: string): CopilotMetrics[] {
   const lines = fileContent.split('\n').filter(line => line.trim());
@@ -455,63 +456,13 @@ export function calculateLanguageStats(metrics: CopilotMetrics[]): LanguageStats
     .sort((a, b) => b.totalEngagements - a.totalEngagements);
 }
 
-// PRU Model Multipliers based on GitHub Copilot documentation
-const MODEL_MULTIPLIERS: Record<string, number> = {
-  // Included models (0 PRUs for paid plans)
-  'gpt-4.1': 0,
-  'gpt-3.5': 0,
-  'gpt-4o': 0,
-  'gpt-4.0': 0,
-  'gpt-4o-latest': 0,
-  'gpt-5-mini': 0,
-  'grok-code-fast': 0,
-
-  
-  // Premium models with multipliers
-  'claude-opus-4': 10,
-  'claude-4.0-sonnet': 1,
-  'claude-3.7-sonnet': 1.25,
-  'claude-3': 1,
-  'claude-3-opus': 10,
-  'claude-3-sonnet': 1,
-  'claude-3-haiku': 1,
-  'claude-2': 1,
-  'gemini-2.0-flash': 0.25,
-  'gemini-2.5-pro': 1,
-  'gemini-pro': 0.33,
-  'gemini': 0.33,
-  'gpt-5': 1,
-  
-  // Default multiplier for unknown models
-  'unknown': 1
-};
-
-function getModelMultiplier(modelName: string): number {
-  const normalizedModel = modelName.toLowerCase();
-  
-  // Check for exact matches first
-  if (MODEL_MULTIPLIERS[normalizedModel]) {
-    return MODEL_MULTIPLIERS[normalizedModel];
-  }
-  
-  // Check for partial matches
-  for (const [key, multiplier] of Object.entries(MODEL_MULTIPLIERS)) {
-    if (normalizedModel.includes(key)) {
-      return multiplier;
-    }
-  }
-  
-  // Default for unknown models
-  return MODEL_MULTIPLIERS.unknown;
-}
-
 export interface DailyModelUsageData {
   date: string;
   pruModels: number;
   standardModels: number;
   unknownModels: number;
   totalPRUs: number;
-  serviceValue: number; // Value of premium services consumed (PRUs × $0.04)
+  serviceValue: number; // Value of premium services consumed (PRUs × SERVICE_VALUE_RATE)
 }
 
 export function calculateDailyModelUsage(metrics: CopilotMetrics[]): DailyModelUsageData[] {
@@ -560,7 +511,7 @@ export function calculateDailyModelUsage(metrics: CopilotMetrics[]): DailyModelU
       standardModels: data.standardModels,
       unknownModels: data.unknownModels,
       totalPRUs: Math.round(data.totalPRUs * 100) / 100,
-      serviceValue: Math.round(data.totalPRUs * 0.04 * 100) / 100
+  serviceValue: Math.round(data.totalPRUs * SERVICE_VALUE_RATE * 100) / 100
     }))
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 }
@@ -691,7 +642,7 @@ export function calculateDailyPRUAnalysis(metrics: CopilotMetrics[]): DailyPRUAn
         standardRequests: data.standardRequests,
         pruPercentage: total > 0 ? Math.round((data.pruRequests / total) * 100 * 100) / 100 : 0,
         totalPRUs: Math.round(data.totalPRUs * 100) / 100,
-        serviceValue: Math.round(data.totalPRUs * 0.04 * 100) / 100,
+        serviceValue: Math.round(data.totalPRUs * SERVICE_VALUE_RATE * 100) / 100,
         topModel: topModelEntry ? topModelEntry[0] : 'unknown',
         topModelPRUs: topModelEntry ? Math.round(topModelEntry[1] * 100) / 100 : 0
       };
@@ -749,7 +700,7 @@ export function calculateAgentModeHeatmap(metrics: CopilotMetrics[]): AgentModeH
       agentModeRequests: data.requests,
       uniqueUsers: data.users.size,
       intensity: Math.ceil((data.requests / maxRequests) * 5),
-      serviceValue: Math.round(data.totalPRUs * 0.04 * 100) / 100
+      serviceValue: Math.round(data.totalPRUs * SERVICE_VALUE_RATE * 100) / 100
     }))
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 }
@@ -827,7 +778,7 @@ export function calculateModelFeatureDistribution(metrics: CopilotMetrics[]): Mo
         features,
         totalInteractions: data.totalInteractions,
         totalPRUs: Math.round(totalPRUs * 100) / 100,
-        serviceValue: Math.round(totalPRUs * 0.04 * 100) / 100
+        serviceValue: Math.round(totalPRUs * SERVICE_VALUE_RATE * 100) / 100
       };
     })
     .filter(item => item.totalInteractions > 0)

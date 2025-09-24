@@ -6,7 +6,7 @@ import { translateFeature } from '../utils/featureTranslations';
 import { getIDEIcon, formatIDEName } from '../utils/ideIcons';
 import PRUCostAnalysisChart from './charts/PRUCostAnalysisChart';
 import { calculateDailyPRUAnalysis } from '../utils/metricsParser';
-import { MODEL_MULTIPLIERS, SERVICE_VALUE_RATE } from '../domain/modelConfig';
+import { SERVICE_VALUE_RATE, getModelMultiplier } from '../domain/modelConfig';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, PointElement, LineElement, Title, Filler, TooltipItem } from 'chart.js';
 import { Pie, Bar, Chart } from 'react-chartjs-2';
 
@@ -143,17 +143,6 @@ export default function UserDetailsView({ userMetrics, userLogin, userId, onBack
     }, [] as typeof userMetrics[0]['totals_by_model_feature']);
 
   // Helper functions for new charts
-
-  const getModelMultiplier = (modelName: string): number => {
-    const normalizedModel = modelName.toLowerCase();
-    if (MODEL_MULTIPLIERS[normalizedModel] !== undefined) {
-      return MODEL_MULTIPLIERS[normalizedModel];
-    }
-    for (const [key, multiplier] of Object.entries(MODEL_MULTIPLIERS)) {
-      if (normalizedModel.includes(key)) return multiplier;
-    }
-    return MODEL_MULTIPLIERS.unknown;
-  };
 
   // Calculate daily model usage data for single user
   const calculateUserModelUsage = () => {
