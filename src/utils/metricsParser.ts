@@ -939,6 +939,17 @@ function calculateFeatureImpactData(metrics: CopilotMetrics[], featureNames: str
     userIds: Set<number>;
   }>();
 
+  const allDates = Array.from(new Set(metrics.map(metric => metric.day)));
+  for (const date of allDates) {
+    if (!dailyData.has(date)) {
+      dailyData.set(date, {
+        locAdded: 0,
+        locDeleted: 0,
+        userIds: new Set<number>(),
+      });
+    }
+  }
+
   const allUniqueUsers = new Set<number>();
 
   for (const metric of metrics) {
@@ -960,22 +971,18 @@ function calculateFeatureImpactData(metrics: CopilotMetrics[], featureNames: str
       }
     }
 
-    if (!hasActivity) continue;
-
     const date = metric.day;
-    if (!dailyData.has(date)) {
-      dailyData.set(date, {
-        locAdded: 0,
-        locDeleted: 0,
-        userIds: new Set<number>()
-      });
+    const dayData = dailyData.get(date);
+    if (!dayData) {
+      continue;
     }
 
-    const dayData = dailyData.get(date)!;
-    dayData.locAdded += totalLocAdded;
-    dayData.locDeleted += totalLocDeleted;
-    dayData.userIds.add(metric.user_id);
-    allUniqueUsers.add(metric.user_id);
+    if (hasActivity) {
+      dayData.locAdded += totalLocAdded;
+      dayData.locDeleted += totalLocDeleted;
+      dayData.userIds.add(metric.user_id);
+      allUniqueUsers.add(metric.user_id);
+    }
   }
 
   return Array.from(dailyData.entries())

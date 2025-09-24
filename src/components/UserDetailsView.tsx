@@ -4,8 +4,9 @@ import React, { useState } from 'react';
 import { CopilotMetrics } from '../types/metrics';
 import { translateFeature } from '../utils/featureTranslations';
 import { getIDEIcon, formatIDEName } from '../utils/ideIcons';
+import ModeImpactChart from './charts/ModeImpactChart';
 import PRUCostAnalysisChart from './charts/PRUCostAnalysisChart';
-import { calculateDailyPRUAnalysis } from '../utils/metricsParser';
+import { calculateDailyPRUAnalysis, calculateJoinedImpactData } from '../utils/metricsParser';
 import { SERVICE_VALUE_RATE, getModelMultiplier } from '../domain/modelConfig';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, PointElement, LineElement, Title, Filler, TooltipItem } from 'chart.js';
 import { Pie, Bar, Chart } from 'react-chartjs-2';
@@ -230,6 +231,7 @@ export default function UserDetailsView({ userMetrics, userLogin, userId, onBack
   };
 
   const userPRUAnalysisData = calculateDailyPRUAnalysis(userMetrics);
+  const userCombinedImpactData = calculateJoinedImpactData(userMetrics);
   const userModelUsageData = calculateUserModelUsage();
   const userAgentHeatmapData = calculateUserAgentModeHeatmap();
 
@@ -1213,6 +1215,15 @@ export default function UserDetailsView({ userMetrics, userLogin, userId, onBack
           )}
         </div>
       </div>
+
+      {userCombinedImpactData.length > 0 && (
+        <ModeImpactChart
+          data={userCombinedImpactData}
+          title="Combined Copilot Impact"
+          description="Daily lines of code added and deleted across Code Completion, Agent Mode, Edit Mode, and Inline Mode activities."
+          emptyStateMessage="No combined impact data available."
+        />
+      )}
 
       {/* PRU Service Value Analysis */}
       {userPRUAnalysisData.some(d => d.pruRequests > 0 || d.standardRequests > 0) && (
