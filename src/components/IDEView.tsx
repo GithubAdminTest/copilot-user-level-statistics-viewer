@@ -4,6 +4,7 @@ import React from 'react';
 import { CopilotMetrics } from '../types/metrics';
 import { getIDEIcon, formatIDEName } from '../utils/ideIcons';
 import SectionHeader from './ui/SectionHeader';
+import DashboardStatsCard from './ui/DashboardStatsCard';
 
 interface IDEStats {
   ide: string;
@@ -174,51 +175,41 @@ export default function IDEView({ metrics, onBack }: IDEViewProps) {
       <div className="space-y-8">
         {/* Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-blue-600">Total IDEs</p>
-                <p className="text-2xl font-bold text-blue-900">{ideStats.length}</p>
-              </div>
-            </div>
-          </div>
+          <DashboardStatsCard
+            value={ideStats.length}
+            label="Total IDEs"
+            accent="blue"
+            tone="tint"
+            icon={(
+              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+            )}
+          />
 
-          <div className="bg-green-50 rounded-lg p-4 border border-green-200">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
-                </svg>
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-green-600">Total Users</p>
-                <p className="text-2xl font-bold text-green-900">
-                  {ideStats.reduce((sum, ide) => sum + ide.uniqueUsers, 0).toLocaleString()}
-                </p>
-              </div>
-            </div>
-          </div>
+          <DashboardStatsCard
+            value={ideStats.reduce((sum, ide) => sum + ide.uniqueUsers, 0)}
+            label="Total Users"
+            accent="green"
+            tone="tint"
+            icon={(
+              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+              </svg>
+            )}
+          />
 
-          <div className="bg-purple-50 rounded-lg p-4 border border-purple-200">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <svg className="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-purple-600">Total Engagements</p>
-                <p className="text-2xl font-bold text-purple-900">
-                  {ideStats.reduce((sum, ide) => sum + ide.totalEngagements, 0).toLocaleString()}
-                </p>
-              </div>
-            </div>
-          </div>
+          <DashboardStatsCard
+            value={ideStats.reduce((sum, ide) => sum + ide.totalEngagements, 0)}
+            label="Total Engagements"
+            accent="purple"
+            tone="tint"
+            icon={(
+              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+            )}
+          />
         </div>
 
         {/* IDEs by Number of Users */}

@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import FeatureAdoptionChart from './charts/FeatureAdoptionChart';
 import AgentModeHeatmapChart from './charts/AgentModeHeatmapChart';
-import MetricTile from './MetricTile';
+import MetricTile from './ui/MetricTile';
 import SectionHeader from './ui/SectionHeader';
 import type { FeatureAdoptionData, AgentModeHeatmapData } from '../utils/metricsParser';
 import type { MetricsStats, CopilotMetrics } from '../types/metrics';

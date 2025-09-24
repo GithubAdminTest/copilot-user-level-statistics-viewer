@@ -3,6 +3,7 @@
 import { UserSummary, CopilotMetrics } from '../types/metrics';
 import { useState } from 'react';
 import SectionHeader from './ui/SectionHeader';
+import DashboardStatsCard from './ui/DashboardStatsCard';
 
 interface UniqueUsersViewProps {
   users: UserSummary[];
@@ -86,35 +87,42 @@ export default function UniqueUsersView({ users, rawMetrics, onBack, onUserClick
       </div>
 
       {/* Summary Stats */}
-  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-4">
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-          <div className="text-2xl font-bold text-blue-600">{users.length}</div>
-          <div className="text-sm text-gray-600">Total Users</div>
-        </div>
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-          <div className="text-2xl font-bold text-green-600">{totalInteractions.toLocaleString()}</div>
-          <div className="text-sm text-gray-600">Total Interactions</div>
-        </div>
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-          <div className="text-2xl font-bold text-purple-600">{totalGeneration.toLocaleString()}</div>
-          <div className="text-sm text-gray-600">Code Generation</div>
-        </div>
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-          <div className="text-2xl font-bold text-orange-600">{totalAcceptance.toLocaleString()}</div>
-          <div className="text-sm text-gray-600">Code Acceptance</div>
-        </div>
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-          <div className="text-2xl font-bold text-teal-600">{chatUsers}</div>
-          <div className="text-sm text-gray-600">Chat Users</div>
-        </div>
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-          <div className="text-2xl font-bold text-indigo-600">{agentUsers}</div>
-          <div className="text-sm text-gray-600">Agent Users</div>
-        </div>
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-          <div className="text-2xl font-bold text-amber-600">{completionOnlyUsers}</div>
-          <div className="text-sm text-gray-600">Completion Only Users</div>
-        </div>
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-4">
+        <DashboardStatsCard
+          value={users.length}
+          label="Total Users"
+          accent="blue"
+        />
+        <DashboardStatsCard
+          value={totalInteractions}
+          label="Total Interactions"
+          accent="green"
+        />
+        <DashboardStatsCard
+          value={totalGeneration}
+          label="Code Generation"
+          accent="purple"
+        />
+        <DashboardStatsCard
+          value={totalAcceptance}
+          label="Code Acceptance"
+          accent="orange"
+        />
+        <DashboardStatsCard
+          value={chatUsers}
+          label="Chat Users"
+          accent="teal"
+        />
+        <DashboardStatsCard
+          value={agentUsers}
+          label="Agent Users"
+          accent="indigo"
+        />
+        <DashboardStatsCard
+          value={completionOnlyUsers}
+          label="Completion Only Users"
+          accent="amber"
+        />
       </div>
 
       {/* Users Table */}

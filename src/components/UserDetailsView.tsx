@@ -10,6 +10,7 @@ import { SERVICE_VALUE_RATE, getModelMultiplier } from '../domain/modelConfig';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, PointElement, LineElement, Title, Filler, TooltipItem } from 'chart.js';
 import { Pie, Bar, Chart } from 'react-chartjs-2';
 import SectionHeader from './ui/SectionHeader';
+import DashboardStatsCard from './ui/DashboardStatsCard';
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, PointElement, LineElement, Title, Filler);
 
@@ -880,38 +881,46 @@ export default function UserDetailsView({ userMetrics, userLogin, userId, onBack
 
       {/* Summary Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-          <div className="text-2xl font-bold text-blue-600">{totalInteractions.toLocaleString()}</div>
-          <div className="text-sm text-gray-600">Total Interactions</div>
-        </div>
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-          <div className="text-2xl font-bold text-green-600">{totalGeneration.toLocaleString()}</div>
-          <div className="text-sm text-gray-600">Code Generation</div>
-        </div>
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-          <div className="text-2xl font-bold text-purple-600">{totalAcceptance.toLocaleString()}</div>
-          <div className="text-sm text-gray-600">Code Acceptance</div>
-        </div>
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-          <div className="text-2xl font-bold text-orange-600">{totalLocAdded.toLocaleString()}</div>
-          <div className="text-sm text-gray-600">LOC Added</div>
-        </div>
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-          <div className="text-2xl font-bold text-rose-600">{totalLocDeleted.toLocaleString()}</div>
-          <div className="text-sm text-gray-600">LOC Deleted</div>
-        </div>
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-          <div className="text-2xl font-bold text-teal-600">{totalLocSuggestedToAdd.toLocaleString()}</div>
-          <div className="text-sm text-gray-600">Suggested Add</div>
-        </div>
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-          <div className="text-2xl font-bold text-indigo-600">{totalLocSuggestedToDelete.toLocaleString()}</div>
-          <div className="text-sm text-gray-600">Suggested Delete</div>
-        </div>
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-          <div className="text-2xl font-bold text-indigo-600">{daysActive}</div>
-          <div className="text-sm text-gray-600">Days Active</div>
-        </div>
+        <DashboardStatsCard
+          value={totalInteractions}
+          label="Total Interactions"
+          accent="blue"
+        />
+        <DashboardStatsCard
+          value={totalGeneration}
+          label="Code Generation"
+          accent="green"
+        />
+        <DashboardStatsCard
+          value={totalAcceptance}
+          label="Code Acceptance"
+          accent="purple"
+        />
+        <DashboardStatsCard
+          value={totalLocAdded}
+          label="LOC Added"
+          accent="orange"
+        />
+        <DashboardStatsCard
+          value={totalLocDeleted}
+          label="LOC Deleted"
+          accent="rose"
+        />
+        <DashboardStatsCard
+          value={totalLocSuggestedToAdd}
+          label="Suggested Add"
+          accent="teal"
+        />
+        <DashboardStatsCard
+          value={totalLocSuggestedToDelete}
+          label="Suggested Delete"
+          accent="indigo"
+        />
+        <DashboardStatsCard
+          value={daysActive}
+          label="Days Active"
+          accent="indigo"
+        />
       </div>
 
       {/* Summary */}

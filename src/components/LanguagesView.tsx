@@ -3,6 +3,7 @@
 import { LanguageStats } from '../utils/metricsParser';
 import { useState } from 'react';
 import SectionHeader from './ui/SectionHeader';
+import DashboardStatsCard from './ui/DashboardStatsCard';
 
 interface LanguagesViewProps {
   languages: LanguageStats[];
@@ -98,43 +99,52 @@ export default function LanguagesView({ languages, onBack }: LanguagesViewProps)
       </div>
 
       {/* Summary Stats */}
-  <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-9 gap-4">
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-          <div className="text-2xl font-bold text-blue-600">{totalLanguages}</div>
-          <div className="text-sm text-gray-600">Total Languages</div>
-        </div>
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-          <div className="text-2xl font-bold text-purple-600">{totalEngagements.toLocaleString()}</div>
-          <div className="text-sm text-gray-600">Total Engagements</div>
-        </div>
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-          <div className="text-2xl font-bold text-green-600">{totalGenerations.toLocaleString()}</div>
-          <div className="text-sm text-gray-600">Code Generations</div>
-        </div>
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-          <div className="text-2xl font-bold text-orange-600">{totalAcceptances.toLocaleString()}</div>
-          <div className="text-sm text-gray-600">Code Acceptances</div>
-        </div>
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-          <div className="text-2xl font-bold text-teal-600">{totalUsers.toLocaleString()}</div>
-          <div className="text-sm text-gray-600">Max Users/Lang</div>
-        </div>
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-          <div className="text-2xl font-bold text-orange-600">{totalLocAdded.toLocaleString()}</div>
-          <div className="text-sm text-gray-600">LOC Added</div>
-        </div>
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-          <div className="text-2xl font-bold text-rose-600">{totalLocDeleted.toLocaleString()}</div>
-          <div className="text-sm text-gray-600">LOC Deleted</div>
-        </div>
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-          <div className="text-2xl font-bold text-teal-600">{totalLocSuggestedToAdd.toLocaleString()}</div>
-          <div className="text-sm text-gray-600">Suggested Add</div>
-        </div>
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-          <div className="text-2xl font-bold text-indigo-600">{totalLocSuggestedToDelete.toLocaleString()}</div>
-          <div className="text-sm text-gray-600">Suggested Delete</div>
-        </div>
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-9 gap-4">
+        <DashboardStatsCard
+          value={totalLanguages}
+          label="Total Languages"
+          accent="blue"
+        />
+        <DashboardStatsCard
+          value={totalEngagements}
+          label="Total Engagements"
+          accent="purple"
+        />
+        <DashboardStatsCard
+          value={totalGenerations}
+          label="Code Generations"
+          accent="green"
+        />
+        <DashboardStatsCard
+          value={totalAcceptances}
+          label="Code Acceptances"
+          accent="orange"
+        />
+        <DashboardStatsCard
+          value={totalUsers}
+          label="Max Users/Lang"
+          accent="teal"
+        />
+        <DashboardStatsCard
+          value={totalLocAdded}
+          label="LOC Added"
+          accent="orange"
+        />
+        <DashboardStatsCard
+          value={totalLocDeleted}
+          label="LOC Deleted"
+          accent="rose"
+        />
+        <DashboardStatsCard
+          value={totalLocSuggestedToAdd}
+          label="Suggested Add"
+          accent="teal"
+        />
+        <DashboardStatsCard
+          value={totalLocSuggestedToDelete}
+          label="Suggested Delete"
+          accent="indigo"
+        />
       </div>
 
       {/* Two Column Layout for Tables */}

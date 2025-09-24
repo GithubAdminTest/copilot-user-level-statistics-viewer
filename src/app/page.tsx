@@ -32,7 +32,7 @@ import PRUUsageAnalysisView from '../components/PRUUsageAnalysisView';
 import CopilotImpactView from '../components/CopilotImpactView';
 import DataQualityAnalysisView from '../components/DataQualityAnalysisView';
 import FilterPanel, { DateRangeFilter } from '../components/FilterPanel';
-import MetricTile from '../components/MetricTile';
+import MetricTile from '../components/ui/MetricTile';
 import { useMetricsData, FilteredMetricsData } from '../components/MetricsContext';
 
 type ViewMode = 'overview' | 'users' | 'userDetails' | 'languages' | 'ides' | 'dataQuality' | 'copilotImpact' | 'pruUsage' | 'copilotAdoption';
