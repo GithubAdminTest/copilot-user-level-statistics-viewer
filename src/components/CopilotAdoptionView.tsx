@@ -6,6 +6,7 @@ import AgentModeHeatmapChart from './charts/AgentModeHeatmapChart';
 import MetricTile from './ui/MetricTile';
 import SectionHeader from './ui/SectionHeader';
 import ExpandableTableSection from './ui/ExpandableTableSection';
+import InsightsCard from './ui/InsightsCard';
 import type { FeatureAdoptionData, AgentModeHeatmapData } from '../utils/metricsParser';
 import type { MetricsStats, CopilotMetrics } from '../types/metrics';
 
@@ -360,24 +361,22 @@ export default function CopilotAdoptionView({ featureAdoptionData, agentModeHeat
 
         {/* Insights and Recommendations */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="p-4 bg-orange-50 rounded-lg">
-            <h4 className="font-semibold text-orange-800 mb-2">Plugin Health Status</h4>
-            <p className="text-sm text-orange-700">
+          <InsightsCard title="Plugin Health Status" variant="orange">
+            <p>
               {outdatedPlugins.length === 0 
                 ? 'Excellent! All IntelliJ users are on recent plugin versions with latest features and security updates.'
                 : `${outdatedPlugins.reduce((sum, p) => sum + p.userCount, 0)} user${outdatedPlugins.reduce((sum, p) => sum + p.userCount, 0) !== 1 ? 's' : ''} ${outdatedPlugins.reduce((sum, p) => sum + p.userCount, 0) !== 1 ? 'are' : 'is'} using outdated plugins which can result in incomplete telemetry and skewed statistics. Consider upgrading for better performance, feature completeness, and accurate reporting.`
               }
             </p>
-          </div>
-          <div className="p-4 bg-blue-50 rounded-lg">
-            <h4 className="font-semibold text-blue-800 mb-2">Upgrade Recommendations</h4>
-            <p className="text-sm text-blue-700">
+          </InsightsCard>
+          <InsightsCard title="Upgrade Recommendations" variant="blue">
+            <p>
               {outdatedPlugins.length > 0 
-                ? `Contact users with outdated plugins to upgrade. Latest versions include improved Agent Mode, better code review features, and enhanced MCP support.`
+                ? 'Contact users with outdated plugins to upgrade. Latest versions include improved Agent Mode, better code review features, and enhanced MCP support.'
                 : 'Keep monitoring plugin versions regularly. New releases often include performance improvements and advanced AI features.'
               }
             </p>
-          </div>
+          </InsightsCard>
         </div>
       </div>
     </div>

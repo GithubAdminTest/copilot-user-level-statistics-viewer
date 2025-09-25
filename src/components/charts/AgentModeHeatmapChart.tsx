@@ -15,6 +15,7 @@ import {
 } from 'chart.js';
 import { Bar, Line } from 'react-chartjs-2';
 import { AgentModeHeatmapData } from '../../utils/metricsParser';
+import InsightsCard from '../ui/InsightsCard';
 
 ChartJS.register(
   CategoryScale,
@@ -264,13 +265,12 @@ export default function AgentModeHeatmapChart({ data }: AgentModeHeatmapChartPro
 
       {/* Usage Insights */}
       <div className="mt-6">
-        <div className="p-4 bg-red-50 rounded-lg">
-          <h4 className="font-semibold text-red-800 mb-2">Agent Mode Insights</h4>
-          <p className="text-sm text-red-700">
-            Agent Mode is a premium feature that creates autonomous coding sessions. 
+        <InsightsCard title="Agent Mode Insights" variant="red">
+          <p>
+            Agent Mode is a premium feature that creates autonomous coding sessions.
             {totalRequests > 100 ? ' High usage indicates strong adoption of advanced AI features.' : ' Consider promoting Agent Mode for complex coding tasks.'}
           </p>
-        </div>
+        </InsightsCard>
       </div>
     </div>
   );

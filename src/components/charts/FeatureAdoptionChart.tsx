@@ -13,6 +13,7 @@ import {
 } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
 import { FeatureAdoptionData } from '../../utils/metricsParser';
+import InsightsCard from '../ui/InsightsCard';
 
 ChartJS.register(
   CategoryScale,
@@ -179,21 +180,19 @@ export default function FeatureAdoptionChart({ data }: FeatureAdoptionChartProps
 
       {/* Insights */}
       <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="p-4 bg-green-50 rounded-lg">
-          <h4 className="font-semibold text-green-800 mb-2">Feature Journey</h4>
-          <p className="text-sm text-green-700">
+        <InsightsCard title="Feature Journey" variant="green">
+          <p>
             {completionRate > 80 ? 'Excellent' : completionRate > 60 ? 'Good' : 'Low'} code completion adoption.
             {chatRate > 40 ? ' Strong' : chatRate > 20 ? ' Moderate' : ' Low'} chat feature engagement.
             {agentRate > 10 ? ' Good' : agentRate > 5 ? ' Emerging' : ' Limited'} Agent Mode usage.
           </p>
-        </div>
-        <div className="p-4 bg-blue-50 rounded-lg">
-          <h4 className="font-semibold text-blue-800 mb-2">Advanced Features</h4>
-          <p className="text-sm text-blue-700">
+        </InsightsCard>
+        <InsightsCard title="Advanced Features" variant="blue">
+          <p>
             Agent Mode is an advanced feature that can drive significant value for users.
             {agentRate > 15 ? ' High adoption suggests good value perception.' : ' Consider promoting Agent Mode benefits to increase adoption.'}
           </p>
-        </div>
+        </InsightsCard>
       </div>
     </div>
   );
