@@ -2,7 +2,7 @@ import React from 'react';
 
 interface InsightsCardProps {
   title: string;
-  variant?: 'green' | 'blue' | 'red' | 'orange' | 'purple' | 'teal';
+  variant?: 'green' | 'blue' | 'red' | 'orange' | 'purple';
   children: React.ReactNode;
   className?: string;
   icon?: React.ReactNode;
@@ -13,8 +13,7 @@ const variantClasses: Record<string, { bg: string; heading: string; body: string
   blue:   { bg: 'bg-blue-50',   heading: 'text-blue-800',   body: 'text-blue-700',   icon: 'text-blue-600' },
   red:    { bg: 'bg-red-50',    heading: 'text-red-800',    body: 'text-red-700',    icon: 'text-red-600' },
   orange: { bg: 'bg-orange-50', heading: 'text-orange-800', body: 'text-orange-700', icon: 'text-orange-600' },
-  purple: { bg: 'bg-purple-50', heading: 'text-purple-800', body: 'text-purple-700', icon: 'text-purple-600' },
-  teal:   { bg: 'bg-teal-50',   heading: 'text-teal-800',   body: 'text-teal-700',   icon: 'text-teal-600' }
+  purple: { bg: 'bg-purple-50', heading: 'text-purple-800', body: 'text-purple-700', icon: 'text-purple-600' }
 };
 
 export default function InsightsCard({ title, variant = 'blue', children, className = '', icon }: InsightsCardProps) {
