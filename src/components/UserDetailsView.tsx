@@ -10,7 +10,8 @@ import PRUCostAnalysisChart from './charts/PRUCostAnalysisChart';
 import { calculateDailyPRUAnalysis, calculateJoinedImpactData } from '../utils/metricsParser';
 import { SERVICE_VALUE_RATE, getModelMultiplier } from '../domain/modelConfig';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, PointElement, LineElement, Title, Filler, TooltipItem } from 'chart.js';
-import { Pie, Bar, Chart } from 'react-chartjs-2';
+import { Bar, Chart } from 'react-chartjs-2';
+import UserSummaryChart from './charts/UserSummaryChart';
 import SectionHeader from './ui/SectionHeader';
 import DashboardStatsCard from './ui/DashboardStatsCard';
 
@@ -898,65 +899,14 @@ export default function UserDetailsView({ userMetrics, userLogin, userId, onBack
         emptyStateMessage="No combined impact data available."
       />
 
-      {/* Summary */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-6">Summary</h3>
-        
-        {/* Features Used */}
-        <div className="mb-6">
-          <h4 className="text-md font-medium text-gray-800 mb-3">Features Used</h4>
-          <div className="flex flex-wrap gap-2">
-            {usedChat && (
-              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
-                Chat
-              </span>
-            )}
-            {usedAgent && (
-              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
-                Agent
-              </span>
-            )}
-            {!usedChat && !usedAgent && (
-              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
-                Completion Only
-              </span>
-            )}
-          </div>
-        </div>
-
-        {/* Charts Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* IDEs Chart */}
-          {ideAggregates.length > 0 && (
-            <div className="bg-gray-50 rounded-lg p-4">
-              <h4 className="text-sm font-medium text-gray-800 mb-3 text-center">IDEs (Interactions)</h4>
-              <div className="h-48">
-                <Pie data={ideChartData} options={chartOptions} />
-              </div>
-            </div>
-          )}
-
-          {/* Programming Languages Chart */}
-          {Object.keys(languageGenerations).length > 0 && (
-            <div className="bg-gray-50 rounded-lg p-4">
-              <h4 className="text-sm font-medium text-gray-800 mb-3 text-center">Languages (Generations)</h4>
-              <div className="h-48">
-                <Pie data={languageChartData} options={chartOptions} />
-              </div>
-            </div>
-          )}
-
-          {/* Models Chart */}
-          {Object.keys(modelInteractions).length > 0 && (
-            <div className="bg-gray-50 rounded-lg p-4">
-              <h4 className="text-sm font-medium text-gray-800 mb-3 text-center">Models (Interactions)</h4>
-              <div className="h-48">
-                <Pie data={modelChartData} options={chartOptions} />
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
+      <UserSummaryChart
+        usedChat={usedChat}
+        usedAgent={usedAgent}
+        ideChartData={ideAggregates.length > 0 ? ideChartData : undefined}
+        languageChartData={Object.keys(languageGenerations).length > 0 ? languageChartData : undefined}
+        modelChartData={Object.keys(modelInteractions).length > 0 ? modelChartData : undefined}
+        chartOptions={chartOptions}
+      />
 
       
 
