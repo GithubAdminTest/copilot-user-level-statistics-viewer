@@ -132,7 +132,7 @@ export default function ModelDetailsView({ onBack }: ModelDetailsViewProps) {
       );
       if (premiumLead > 0) {
         paragraphs.push(
-          `Premium volume is ${numberFormatter.format(premiumLead)} interactions above standard. Confirm monthly PRU bundles (baseline 300 per user) are sufficient or plan for add-ons.`
+          `Premium volume is ${numberFormatter.format(premiumLead)} interactions above Standard Models. Confirm monthly PRU bundles (baseline 300 per user) are sufficient or plan for add-ons.`
         );
       } else {
         paragraphs.push(
