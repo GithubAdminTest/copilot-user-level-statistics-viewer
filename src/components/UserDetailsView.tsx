@@ -12,6 +12,7 @@ import { SERVICE_VALUE_RATE, getModelMultiplier } from '../domain/modelConfig';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, PointElement, LineElement, Title, Filler, TooltipItem } from 'chart.js';
 import { Bar, Chart } from 'react-chartjs-2';
 import UserSummaryChart from './charts/UserSummaryChart';
+import UserActivityByLanguageAndFeatureChart from './charts/UserActivityByLanguageAndFeatureChart';
 import SectionHeader from './ui/SectionHeader';
 import DashboardStatsCard from './ui/DashboardStatsCard';
 
@@ -26,7 +27,6 @@ interface UserDetailsViewProps {
 
 export default function UserDetailsView({ userMetrics, userLogin, userId, onBack }: UserDetailsViewProps) {
   // State for collapsible sections
-  const [isLanguageTableExpanded, setIsLanguageTableExpanded] = useState(false);
   const [isModelTableExpanded, setIsModelTableExpanded] = useState(false);
 
   // State for chart view types
@@ -908,8 +908,6 @@ export default function UserDetailsView({ userMetrics, userLogin, userId, onBack
         chartOptions={chartOptions}
       />
 
-      
-
       {/* Totals by IDE */}
       <IDEActivityChart
         ideAggregates={ideAggregates}
@@ -953,111 +951,11 @@ export default function UserDetailsView({ userMetrics, userLogin, userId, onBack
         </div>
       </div>
 
-      {/* Totals by Language and Feature - Grouped by Language */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Activity by Language and Feature</h3>
-        
-        {/* Bar Chart */}
-        {languageBarChartData.datasets.length > 0 && (
-          <div className="mb-6">
-            <div className="bg-gray-50 rounded-lg p-4">
-              <h4 className="text-sm font-medium text-gray-800 mb-4 text-center">Daily Language Generations</h4>
-              <div className="h-64">
-                <Bar data={languageBarChartData} options={languageBarChartOptions} />
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Collapsible Table Section */}
-        <div className="border-t border-gray-200 pt-4">
-          <button
-            onClick={() => setIsLanguageTableExpanded(!isLanguageTableExpanded)}
-            className="flex items-center justify-between w-full px-4 py-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            <span className="text-sm font-medium text-gray-700">
-              Detailed Language and Feature Breakdown
-            </span>
-            <svg
-              className={`w-5 h-5 text-gray-500 transition-transform duration-200 ${
-                isLanguageTableExpanded ? 'rotate-180' : ''
-              }`}
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
-          </button>
-          
-          {isLanguageTableExpanded && (
-            <div className="mt-4 overflow-x-auto">
-              {(() => {
-                // Group language feature data by language
-                const groupedByLanguage = languageFeatureAggregates.reduce((acc, item) => {
-                  if (!acc[item.language]) {
-                    acc[item.language] = [];
-                  }
-                  acc[item.language].push(item);
-                  return acc;
-                }, {} as Record<string, typeof languageFeatureAggregates>);
-
-                // Sort languages by total generation activity (descending), but put "unknown" and empty strings at the end
-                const sortedLanguages = Object.keys(groupedByLanguage).sort((a, b) => {
-                  if (a === 'unknown' || a === '') return 1;
-                  if (b === 'unknown' || b === '') return -1;
-                  
-                  const totalGenerationA = groupedByLanguage[a].reduce((sum, item) => sum + item.code_generation_activity_count, 0);
-                  const totalGenerationB = groupedByLanguage[b].reduce((sum, item) => sum + item.code_generation_activity_count, 0);
-                  
-                  return totalGenerationB - totalGenerationA; // Descending order
-                });
-
-                return (
-                  <div className="space-y-6">
-                    {sortedLanguages.map((language) => (
-                      <div key={language} className="border border-gray-200 rounded-lg p-4">
-                        <h4 className="text-md font-semibold text-gray-800 mb-3 capitalize">
-                          {language === 'unknown' || language === '' ? 'Unknown Language' : language}
-                          <span className="text-sm font-normal text-gray-600 ml-2">
-                            ({groupedByLanguage[language].reduce((sum, item) => sum + item.code_generation_activity_count, 0).toLocaleString()} total generations)
-                          </span>
-                        </h4>
-                        <table className="w-full divide-y divide-gray-200">
-                          <thead className="bg-gray-50">
-                            <tr>
-                              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Feature</th>
-                              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Generation</th>
-                              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acceptance</th>
-                              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">LOC Added</th>
-                              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">LOC Deleted</th>
-                              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Suggested Add</th>
-                              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Suggested Delete</th>
-                            </tr>
-                          </thead>
-                          <tbody className="bg-white divide-y divide-gray-200">
-                            {groupedByLanguage[language].map((item, index) => (
-                              <tr key={index}>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">{translateFeature(item.feature)}</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">{item.code_generation_activity_count.toLocaleString()}</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">{item.code_acceptance_activity_count.toLocaleString()}</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">{item.loc_added_sum.toLocaleString()}</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">{item.loc_deleted_sum.toLocaleString()}</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">{item.loc_suggested_to_add_sum.toLocaleString()}</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">{item.loc_suggested_to_delete_sum.toLocaleString()}</td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    ))}
-                  </div>
-                );
-              })()}
-            </div>
-          )}
-        </div>
-      </div>
+      <UserActivityByLanguageAndFeatureChart
+        languageFeatureAggregates={languageFeatureAggregates}
+        languageBarChartData={languageBarChartData}
+        languageBarChartOptions={languageBarChartOptions}
+      />
 
       {/* PRU Service Value Analysis */}
       {userPRUAnalysisData.some(d => d.pruRequests > 0 || d.standardRequests > 0) && (
