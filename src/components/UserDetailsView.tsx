@@ -56,10 +56,6 @@ export default function UserDetailsView({ userMetrics, userLogin, userId, onBack
     });
   };
 
-  // State for collapsible sections moved into dedicated components
-
-  // (Removed agent heatmap chart state and related section)
-
   // Calculate aggregated stats for this user
   const totalInteractions = userMetrics.reduce((sum, metric) => sum + metric.user_initiated_interaction_count, 0);
   const totalGeneration = userMetrics.reduce((sum, metric) => sum + metric.code_generation_activity_count, 0);
@@ -748,9 +744,7 @@ export default function UserDetailsView({ userMetrics, userLogin, userId, onBack
 
       <PRUCostAnalysisChart data={userPRUAnalysisData} />
 
-      {/* Daily PRU vs Standard Model Usage */}
       <PRUModelUsageChart data={userModelUsageData} />
-
 
       <UserActivityByModelAndFeatureChart
         modelFeatureAggregates={modelFeatureAggregates}
@@ -758,7 +752,6 @@ export default function UserDetailsView({ userMetrics, userLogin, userId, onBack
         modelBarChartOptions={modelBarChartOptions}
       />
 
-      {/* Day Details Modal */}
       <DayDetailsModal
         isOpen={modalState.isOpen}
         onClose={handleCloseModal}
