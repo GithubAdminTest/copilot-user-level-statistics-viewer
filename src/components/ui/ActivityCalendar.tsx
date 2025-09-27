@@ -159,7 +159,6 @@ export default function ActivityCalendar({ userMetrics, onDayClick }: ActivityCa
         </div>
         
         {/* Legend */}
-                {/* Legend */}
         <div className="flex items-center justify-end space-x-1 text-xs text-gray-500 mt-2">
           <span>Less activity</span>
           <div className="flex space-x-1 mx-2">
