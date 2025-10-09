@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import SectionHeader from './ui/SectionHeader';
 import ModeImpactChart from './charts/ModeImpactChart';
 import FeatureAdoptionChart from './charts/FeatureAdoptionChart';
 import PremiumModelsUsageChart from './charts/PremiumModelsUsageChart';
 import type { CopilotMetrics, MetricsStats } from '../types/metrics';
 import type { FeatureAdoptionData, AgentImpactData, CodeCompletionImpactData, ModeImpactData } from '../utils/metricsParser';
+import { isPremiumModel } from '../domain/modelConfig';
 
 interface CustomerEmailViewProps {
   metrics: CopilotMetrics[];
@@ -14,7 +15,6 @@ interface CustomerEmailViewProps {
   joinedImpactData: ModeImpactData[];
   agentImpactData: AgentImpactData[];
   codeCompletionImpactData: CodeCompletionImpactData[];
-  stats: MetricsStats;
   onBack: () => void;
 }
 
@@ -24,12 +24,45 @@ export default function CustomerEmailView({
   joinedImpactData,
   agentImpactData,
   codeCompletionImpactData,
-  stats,
   onBack
 }: CustomerEmailViewProps) {
   const [contactName, setContactName] = useState('');
   const [companyName, setCompanyName] = useState('');
-  const topModelName = stats?.topModel?.name || 'N/A';
+
+  // Calculate top model, skipping "unknown" if needed
+  const { displayModelName, isTopModelPremium } = useMemo(() => {
+    // Collect all model engagements from metrics
+    const modelEngagements = new Map<string, number>();
+    
+    for (const metric of metrics) {
+      for (const modelFeature of metric.totals_by_model_feature) {
+        const model = modelFeature.model.toLowerCase();
+        const current = modelEngagements.get(model) || 0;
+        modelEngagements.set(
+          model,
+          current + modelFeature.code_generation_activity_count + modelFeature.code_acceptance_activity_count
+        );
+      }
+    }
+
+    // Sort models by engagement
+    const sortedModels = Array.from(modelEngagements.entries())
+      .sort((a, b) => b[1] - a[1]);
+
+    // Find first model that's not "unknown"
+    let selectedModel = sortedModels[0];
+    if (selectedModel && selectedModel[0].toLowerCase() === 'unknown' && sortedModels.length > 1) {
+      selectedModel = sortedModels[1];
+    }
+
+    const modelName = selectedModel ? selectedModel[0] : 'N/A';
+    const isPremium = modelName !== 'N/A' ? isPremiumModel(modelName) : false;
+
+    return {
+      displayModelName: modelName,
+      isTopModelPremium: isPremium
+    };
+  }, [metrics]);
 
   // Calculate total lines added for Agent Mode vs Code Completion
   const totalAgentLinesAdded = agentImpactData.reduce((sum, entry) => sum + entry.locAdded, 0);
@@ -139,7 +172,14 @@ export default function CustomerEmailView({
           
           <p>I analyzed the export to show you what&apos;s possible.</p>
           
-          <p>The top used model in your enterprise is <strong>{topModelName}</strong>.</p>
+          <p>
+            The top used model in your enterprise is <strong>{displayModelName}</strong>.{' '}
+            {isTopModelPremium ? (
+              <>This indicates a good utilization of included pre-payed Premium Model Requests.</>
+            ) : (
+              <>This is an unusual finding across my customers.</>
+            )}
+          </p>
           
           <p>From the overall Copilot Impact point of view, things look pretty good, though.</p>
         </div>
