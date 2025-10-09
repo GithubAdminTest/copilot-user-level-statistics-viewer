@@ -349,7 +349,6 @@ export default function Home() {
             agentImpactData={agentImpactData}
             codeCompletionImpactData={codeCompletionImpactData}
             stats={stats}
-            enterpriseName={enterpriseName}
             onBack={() => setCurrentView('overview')}
           />
         )}
