@@ -71,6 +71,14 @@ export default function CustomerEmailView({
   const totalCodeCompletionLinesAdded = codeCompletionImpactData.reduce((sum, entry) => sum + entry.locAdded, 0);
   const isAgentModeHealthy = totalAgentLinesAdded > totalCodeCompletionLinesAdded;
 
+  // Calculate Agent Mode adoption percentage
+  const agentModeAdoptionPercentage = useMemo(() => {
+    if (!featureAdoptionData || featureAdoptionData.totalUsers === 0) {
+      return 0;
+    }
+    return Math.round((featureAdoptionData.agentModeUsers / featureAdoptionData.totalUsers) * 100);
+  }, [featureAdoptionData]);
+
   return (
     <div className="space-y-6">
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
@@ -80,9 +88,6 @@ export default function CustomerEmailView({
           onBack={onBack}
           className="mb-6"
         />
-        <div className="mb-4 text-sm text-gray-600 bg-blue-50 border border-blue-200 rounded px-3 py-2">
-          <strong>Preview Mode:</strong> Email body is displayed at 900px width
-        </div>
 
         {/* Input Fields Section */}
         <div className="bg-indigo-50 border-2 border-indigo-200 rounded-lg p-6">
@@ -301,16 +306,45 @@ export default function CustomerEmailView({
             </p>
           </div>
 
+          <p>Feature adoption funnel as of today:</p>
           <div>
             <FeatureAdoptionChart data={featureAdoptionData as FeatureAdoptionData} />
           </div>
+          
+          <div className="prose prose-sm max-w-none text-gray-700">
+            {agentModeAdoptionPercentage < 30 ? (
+              <p>
+                Agent Mode, the most advanced feature, has a rather low adoption rate. 
+                Currently used by ~{agentModeAdoptionPercentage}% of users. 
+                I suggest exploring why this might be happening. Your engineers might be facing technical issues, 
+                or they may simply be unaware of this capability and could benefit from some training.
+                <br /><br />
+                Please let us know if you&apos;d like help addressing this.
+              </p>
+            ) : agentModeAdoptionPercentage < 55 ? (
+              <p>
+                Agent Mode, the most advanced feature, has a fair amount of users with some room for growth where it makes sense. 
+                It&apos;s currently used by ~{agentModeAdoptionPercentage}% of users.
+              </p>
+            ) : (
+              <p>
+                Agent Mode, the most advanced feature, has great adoption levels. 
+                It&apos;s currently used by ~{agentModeAdoptionPercentage}% of users. I&apos;m happy to see such numbers!
+              </p>
+            )}
+          </div>
+          
           <div>
             <PremiumModelsUsageChart metrics={metrics} />
           </div>
 
           {/* Email Closing */}
           <div className="mt-8 prose prose-sm max-w-none text-gray-700 space-y-4">
-            <p>Please let me know if you would like to discuss the data in more detail.</p>
+            <p>
+              I know this is quite a bit of information, and I apologize for the lengthy email. 
+              I hope you find it useful and insightful. Please feel free to reach out if you have any questions 
+              or if you&apos;d like to discuss any of this together.
+            </p>
             <p>Kind regards,</p>
           </div>
         </div>
