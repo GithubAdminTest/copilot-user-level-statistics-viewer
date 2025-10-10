@@ -29,6 +29,7 @@ export default function CustomerEmailView({
   const [contactName, setContactName] = useState('');
   const [companyName, setCompanyName] = useState('');
   const [enterpriseSlug, setEnterpriseSlug] = useState('');
+  const [isCopilotStandalone, setIsCopilotStandalone] = useState(false);
 
   // Calculate top model, skipping "unknown" if needed
   const { displayModelName, isTopModelPremium } = useMemo(() => {
@@ -127,6 +128,18 @@ export default function CustomerEmailView({
               />
             </div>
           </div>
+          <div className="mt-4 flex items-center">
+            <input
+              type="checkbox"
+              id="isCopilotStandalone"
+              checked={isCopilotStandalone}
+              onChange={(e) => setIsCopilotStandalone(e.target.checked)}
+              className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+            />
+            <label htmlFor="isCopilotStandalone" className="ml-2 block text-sm font-medium text-gray-700">
+              Is Copilot Standalone
+            </label>
+          </div>
         </div>
       </div>
 
@@ -186,16 +199,68 @@ export default function CustomerEmailView({
           
           <p>I analyzed the export to show you what&apos;s possible.</p>
           
-          <p>
-            The top used model in your enterprise is <strong>{displayModelName}</strong>.{' '}
-            {isTopModelPremium ? (
-              <>This indicates a good utilization of included pre-payed Premium Model Requests.</>
-            ) : (
-              <>This is an unusual finding across my customers.</>
-            )}
-          </p>
+          {isTopModelPremium ? (
+            <p>
+              The top used model in your enterprise is <strong>{displayModelName}</strong>. 
+              This indicates a good utilization of included pre-payed Premium Model Requests.
+            </p>
+          ) : (
+            <>
+              <p>
+                The top used model in your enterprise is <strong>{displayModelName}</strong>. 
+                This is an unusual finding as an absolute majority of my customers have Premium Models enabled and actively used. 
+                {companyName || '[Company Name]'} is entitled to them (incl. in the cost of the service) and they do perform better 
+                (both in terms of benchmarks, as well as anecdotally from words of my customers). There shall be no impact 
+                (financial or governance wise) on increasing Premium Models adoption and the benefits are substantial.
+              </p>
+              
+              <p>There are several ways to unlock power of Premium Models:</p>
+              
+              <ul className="list-disc pl-6 space-y-2">
+                {!isCopilotStandalone && (
+                  <>
+                    <li>
+                      <a 
+                        href="https://www.youtube.com/watch?v=HDEGFNAUkX8"
+                        className="text-indigo-600 hover:text-indigo-800 underline"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        Copilot Code Reviews
+                      </a>
+                      . You can find docs{' '}
+                      <a 
+                        href="https://docs.github.com/en/copilot/how-tos/use-copilot-agents/request-a-code-review/use-code-review?tool=webui"
+                        className="text-indigo-600 hover:text-indigo-800 underline"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        here
+                      </a>
+                      .
+                    </li>
+                    <li>
+                      <a 
+                        href="https://docs.github.com/en/enterprise-cloud@latest/copilot/concepts/agents/coding-agent/about-coding-agent"
+                        className="text-indigo-600 hover:text-indigo-800 underline"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        Copilot Coding Agent
+                      </a>
+                      .
+                    </li>
+                  </>
+                )}
+                <li>More Complex tasks for Copilot Agent Mode</li>
+                <li>Better quality answers in Copilot Chat Ask mode</li>
+              </ul>
+              <p>I'm happy to discuss them with you and help you gaining more value from the product.</p>
+            </>
+          )}
           
-          <p>From the overall Copilot Impact point of view, things look pretty good, though.</p>
+          <p>
+            From the overall Copilot Impact point of view, things look pretty good.</p>
         </div>
 
         {/* Charts Section */}
