@@ -48,7 +48,7 @@ async function fetchVsCodeVersions(): Promise<SimpleVersionInfo[]> {
         criteria: [
           {
             filterType: 7,
-            value: 'github.copilot',
+            value: 'github.copilot-chat',
           },
         ],
         pageNumber: 1,
@@ -79,7 +79,7 @@ async function fetchVsCodeVersions(): Promise<SimpleVersionInfo[]> {
   const json = (await res.json()) as VsCodeExtensionQueryResult;
   const ext = json.results?.[0]?.extensions?.[0];
   if (!ext) {
-    throw new Error('Extension github.copilot not found in VS Code marketplace response');
+    throw new Error('Extension github.copilot-chat not found in VS Code marketplace response');
   }
 
   const versions = ext.versions ?? [];

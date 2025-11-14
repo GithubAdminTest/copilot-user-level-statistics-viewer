@@ -38,6 +38,7 @@ export default function CopilotAdoptionView({ featureAdoptionData, agentModeHeat
   const [vsError, setVsError] = useState<string | null>(null);
   const [vsLoading, setVsLoading] = useState<boolean>(false);
   const [expandedUsernames, setExpandedUsernames] = useState<Set<string>>(new Set());
+  const [expandedVsUsernames, setExpandedVsUsernames] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     let isMounted = true;
@@ -153,6 +154,46 @@ export default function CopilotAdoptionView({ featureAdoptionData, agentModeHeat
     return userSet.size;
   }, [pluginVersionAnalysis]);
 
+  // VS Code plugin version analysis
+  const vscodeVersionAnalysis = React.useMemo(() => {
+    const versionMap = new Map<string, Set<string>>();
+
+    for (const metric of metrics) {
+      for (const ideTotal of metric.totals_by_ide) {
+        const pluginInfo = ideTotal.last_known_plugin_version;
+        if (
+          ideTotal.ide === 'vscode' &&
+          pluginInfo?.plugin_version &&
+          pluginInfo.plugin === 'copilot-chat'
+        ) {
+          const rawVersion = pluginInfo.plugin_version;
+          const lower = rawVersion.toLowerCase();
+          if (lower.endsWith('-insider') || lower.endsWith('-nightly')) continue;
+          if (!versionMap.has(rawVersion)) {
+            versionMap.set(rawVersion, new Set());
+          }
+          versionMap.get(rawVersion)!.add(metric.user_login);
+        }
+      }
+    }
+
+    return Array.from(versionMap.entries())
+      .map(([version, usernamesSet]) => ({
+        version,
+        userCount: usernamesSet.size,
+        usernames: Array.from(usernamesSet).sort(),
+      }))
+      .sort((a, b) => b.userCount - a.userCount);
+  }, [metrics]);
+
+  const totalUniqueVsCodeUsers = React.useMemo(() => {
+    const userSet = new Set<string>();
+    for (const v of vscodeVersionAnalysis) {
+      for (const username of v.usernames) userSet.add(username);
+    }
+    return userSet.size;
+  }, [vscodeVersionAnalysis]);
+
   // Get latest 8 stable (non-nightly) versions from JetBrains data
   const latestEightUpdates = React.useMemo(() => {
     if (!jetbrainsUpdates) return [];
@@ -161,6 +202,12 @@ export default function CopilotAdoptionView({ featureAdoptionData, agentModeHeat
   }, [jetbrainsUpdates]);
 
   const latestEightVersions = React.useMemo(() => latestEightUpdates.map(u => u.version), [latestEightUpdates]);
+
+  // VS Code latest versions window from rolling history
+  const latestVsCodeVersions = React.useMemo(
+    () => (vscodeVersions || []).map(v => v.version),
+    [vscodeVersions],
+  );
 
   // Map of version -> release date (cdate) for quick lookup (stable only)
   const jetbrainsVersionDateMap = React.useMemo(() => {
@@ -183,6 +230,14 @@ export default function CopilotAdoptionView({ featureAdoptionData, agentModeHeat
       !latestEightVersions.includes(plugin.version)
     );
   }, [pluginVersionAnalysis, latestEightVersions]);
+
+  const outdatedVsCodePlugins = React.useMemo(
+    () =>
+      vscodeVersionAnalysis.filter(
+        (plugin) => !latestVsCodeVersions.includes(plugin.version),
+      ),
+    [vscodeVersionAnalysis, latestVsCodeVersions],
+  );
 
   function formatDate(dateString: string): string {
     const d = new Date(dateString);
@@ -429,6 +484,80 @@ export default function CopilotAdoptionView({ featureAdoptionData, agentModeHeat
           VS Code using the GitHub Copilot extension. Version history is maintained as a rolling window of recent releases.
         </p>
 
+        {/* VS Code Plugin Summary Metrics */}
+        {vscodeVersionAnalysis.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <MetricTile
+              title="Total VS Code Users"
+              value={totalUniqueVsCodeUsers}
+              accent="blue"
+              subtitle="Users with extension version data"
+              icon={
+                <svg
+                  className="w-8 h-8"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 4h14a2 2 0 012 2v10a2 2 0 01-2 2H7l-4 3V6a2 2 0 012-2z"
+                  />
+                </svg>
+              }
+            />
+            <MetricTile
+              title="Unique VS Code Versions"
+              value={vscodeVersionAnalysis.length}
+              accent="indigo"
+              subtitle="Different extension versions detected"
+              icon={
+                <svg
+                  className="w-8 h-8"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M3 7h18M3 12h18M3 17h18"
+                  />
+                </svg>
+              }
+            />
+            <MetricTile
+              title="VS Code Users on Outdated Versions"
+              value={outdatedVsCodePlugins.reduce((sum, p) => sum + p.userCount, 0)}
+              accent={outdatedVsCodePlugins.length > 0 ? 'orange' : 'emerald'}
+              subtitle={`${outdatedVsCodePlugins.length} outdated version${outdatedVsCodePlugins.length !== 1 ? 's' : ''} detected`}
+              icon={
+                <svg
+                  className="w-8 h-8"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 9v2m0 4h.01M4.93 19h14.14a1 1 0 00.9-1.45L13.9 4.55a1 1 0 00-1.8 0L4.03 17.55A1 1 0 004.93 19z"
+                  />
+                </svg>
+              }
+            />
+          </div>
+        ) : (
+          <div className="p-4 bg-gray-50 border border-gray-200 rounded-md mb-6">
+            <div className="text-gray-800 font-medium">No VS Code Extension Data Available</div>
+            <div className="text-gray-600 text-sm mt-1">No VS Code users with extension version information were found in the current dataset.</div>
+          </div>
+        )}
+
         <div className="mb-8">
           <ExpandableTableSection
             items={vscodeVersions || []}
@@ -475,6 +604,73 @@ export default function CopilotAdoptionView({ featureAdoptionData, agentModeHeat
             )}
           </ExpandableTableSection>
         </div>
+
+        {vscodeVersionAnalysis.length > 0 && (
+          <div className="mb-8">
+            <h4 className="text-md font-semibold text-gray-800 mb-3">VS Code Users by Extension Version</h4>
+            <p className="text-sm text-gray-600 mb-3">
+              Breakdown of VS Code users by installed GitHub Copilot extension version. Versions outside the latest rolling window are considered outdated.
+            </p>
+            <ExpandableTableSection
+              items={vscodeVersionAnalysis}
+              initialCount={5}
+              buttonCollapsedLabel={(total) => `Show All ${total} Versions`}
+              buttonExpandedLabel="Show Less"
+            >
+              {({ visibleItems }) => (
+                <div className="overflow-x-auto border border-gray-200 rounded-md">
+                  <table className="min-w-full divide-y divide-gray-200 text-sm">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-4 py-2 text-left font-medium text-gray-700">Extension Version</th>
+                        <th className="px-4 py-2 text-left font-medium text-gray-700">Status</th>
+                        <th className="px-4 py-2 text-left font-medium text-gray-700">Number of Users</th>
+                        <th className="px-4 py-2 text-left font-medium text-gray-700">Usernames</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100 bg-white">
+                      {visibleItems.map((plugin) => {
+                        const isLatest = latestVsCodeVersions.includes(plugin.version);
+                        const isExpanded = expandedVsUsernames.has(plugin.version);
+                        const userLabel = isExpanded
+                          ? plugin.usernames.join(', ')
+                          : `${plugin.usernames.slice(0, 3).join(', ')}${plugin.usernames.length > 3 ? '...' : ''}`;
+                        return (
+                          <tr key={plugin.version} className={isLatest ? 'hover:bg-gray-50' : 'hover:bg-red-50'}>
+                            <td className="px-4 py-2 font-mono text-gray-900 whitespace-nowrap">{plugin.version}</td>
+                            <td className="px-4 py-2 text-gray-700 whitespace-nowrap">{isLatest ? 'Latest window' : 'Outdated'}</td>
+                            <td className="px-4 py-2 text-center">{plugin.userCount}</td>
+                            <td className="px-4 py-2">
+                              <div className="max-w-md">
+                                <span className="text-xs text-gray-600">{userLabel}</span>
+                                {plugin.usernames.length > 3 && (
+                                  <button
+                                    onClick={() => {
+                                      const next = new Set(expandedVsUsernames);
+                                      if (isExpanded) {
+                                        next.delete(plugin.version);
+                                      } else {
+                                        next.add(plugin.version);
+                                      }
+                                      setExpandedVsUsernames(next);
+                                    }}
+                                    className="ml-2 text-xs text-blue-600 hover:text-blue-800 underline"
+                                  >
+                                    {isExpanded ? 'Show Less' : `Show All ${plugin.usernames.length}`}
+                                  </button>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </ExpandableTableSection>
+          </div>
+        )}
 
         {/* Insights and Recommendations */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
