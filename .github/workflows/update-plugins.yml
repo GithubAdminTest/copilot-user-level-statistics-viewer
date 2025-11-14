@@ -1,0 +1,44 @@
+name: Scheduled Plugin Versions Update
+
+on:
+  schedule:
+    - cron: '0 */8 * * *'
+  workflow_dispatch:
+
+jobs:
+  update-plugins:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Update plugin versions
+        run: npm run update:plugins
+
+      - name: Check for changes
+        id: git-diff
+        run: |
+          if [[ -n "$(git status --porcelain)" ]]; then
+            echo "changes=true" >> $GITHUB_OUTPUT
+          else
+            echo "changes=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Trigger build & deploy workflow
+        if: steps.git-diff.outputs.changes == 'true'
+        uses: benc-uk/workflow-dispatch@v1
+        with:
+          workflow: deploy.yml
+          ref: main
