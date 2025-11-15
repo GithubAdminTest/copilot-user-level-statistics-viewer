@@ -28,7 +28,10 @@ export const KNOWN_MODELS: Model[] = [
   // Premium models with multipliers
   new Model('gpt-5', 1, true),
   new Model('gpt-5.0', 1, true),
+  new Model('gpt-5.1', 1, true),
   new Model('gpt-5.0-codex', 1, true),
+  new Model('gpt-5.1-codex', 1, true),
+  new Model('gpt-5.1-codex-mini', 0.33, true),
   new Model('o3', 1, true),
   new Model('o3-mini', 0.33, true),
   new Model('o4-mini', 0.33, true),
@@ -39,6 +42,7 @@ export const KNOWN_MODELS: Model[] = [
   new Model('claude-4.5-sonnet', 1, true),
   new Model('claude-opus-4', 10, true),
   new Model('claude-opus-4.1', 10, true),
+  new Model('claude-haiku-4.5', 0.33, true),
   new Model('gemini-2.0-flash', 0.25, true),
   new Model('gemini-2.5-pro', 1, true),
 
