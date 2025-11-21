@@ -2,28 +2,9 @@
 
 import { useState, useMemo, useEffect } from 'react';
 import { CopilotMetrics, MetricsStats } from '../types/metrics';
-import { 
-  parseMetricsFile, 
-  calculateStats, 
-  calculateUserSummaries, 
-  calculateDailyEngagement, 
-  calculateDailyChatUsers, 
-  calculateDailyChatRequests, 
-  calculateLanguageStats, 
-  filterUnknownLanguages,
-  calculateDailyModelUsage,
-  calculateFeatureAdoption,
-  calculateDailyPRUAnalysis,
-  calculateAgentModeHeatmap,
-  calculateModelFeatureDistribution,
-  calculateAgentImpactData,
-  calculateCodeCompletionImpactData,
-  calculateEditModeImpactData,
-  calculateInlineModeImpactData,
-  calculateAskModeImpactData,
-  calculateJoinedImpactData
-} from '../utils/metricsParser';
-import { filterMetricsByDateRange, getFilteredDateRange } from '../utils/dateFilters';
+import { parseMetricsStream } from '../utils/metricsParser';
+import { calculateStats } from '../utils/metricCalculators';
+import { useMetricsProcessing } from '../hooks/useMetricsProcessing';
 import UniqueUsersView from '../components/UniqueUsersView';
 import UserDetailsView from '../components/UserDetailsView';
 import LanguagesView from '../components/LanguagesView';
@@ -39,7 +20,7 @@ import CustomerEmailView from '../components/CustomerEmailView';
 import FilterPanel, { DateRangeFilter } from '../components/FilterPanel';
 import MetricTile from '../components/ui/MetricTile';
 import ModelDetailsView from '../components/ModelDetailsView';
-import { useMetricsData, FilteredMetricsData } from '../components/MetricsContext';
+import { useMetricsData } from '../components/MetricsContext';
 
 type ViewMode = 'overview' | 'users' | 'userDetails' | 'languages' | 'ides' | 'dataQuality' | 'copilotImpact' | 'pruUsage' | 'copilotAdoption' | 'modelDetails' | 'customerEmail';
 
@@ -62,85 +43,12 @@ export default function Home() {
   const [selectedModel, setSelectedModel] = useState<string | null>(null);
 
   // Calculate filtered data based on date range and language filters
-  const filteredData = useMemo(() => {
-    if (!rawMetrics.length || !originalStats) {
-      return {
-        metrics: [],
-        stats: null,
-        userSummaries: [],
-        engagementData: [],
-        chatUsersData: [],
-        chatRequestsData: [],
-        languageStats: [],
-        modelUsageData: [],
-        featureAdoptionData: null,
-        pruAnalysisData: [],
-        agentModeHeatmapData: [],
-        modelFeatureDistributionData: [],
-        agentImpactData: [],
-        codeCompletionImpactData: [],
-        editModeImpactData: [],
-        inlineModeImpactData: [],
-        askModeImpactData: [],
-        joinedImpactData: []
-      };
-    }
-
-    // Apply language filter first if enabled
-    const processedMetrics = removeUnknownLanguages ? filterUnknownLanguages(rawMetrics) : rawMetrics;
-    
-    // Then apply date range filter
-    const filteredMetrics = filterMetricsByDateRange(processedMetrics, dateRangeFilter, originalStats.reportEndDay);
-    const filteredStats = calculateStats(filteredMetrics);
-    const filteredUserSummaries = calculateUserSummaries(filteredMetrics);
-    const filteredEngagementData = calculateDailyEngagement(filteredMetrics);
-    const filteredChatUsersData = calculateDailyChatUsers(filteredMetrics);
-    const filteredChatRequestsData = calculateDailyChatRequests(filteredMetrics);
-    const filteredLanguageStats = calculateLanguageStats(filteredMetrics);
-    
-    // Calculate PRU analysis data
-    const filteredModelUsageData = calculateDailyModelUsage(filteredMetrics);
-    const filteredFeatureAdoptionData = calculateFeatureAdoption(filteredMetrics);
-    const filteredPRUAnalysisData = calculateDailyPRUAnalysis(filteredMetrics);
-    const filteredAgentModeHeatmapData = calculateAgentModeHeatmap(filteredMetrics);
-    const filteredModelFeatureDistributionData = calculateModelFeatureDistribution(filteredMetrics);
-    const filteredAgentImpactData = calculateAgentImpactData(filteredMetrics);
-    const filteredCodeCompletionImpactData = calculateCodeCompletionImpactData(filteredMetrics);
-    const filteredEditModeImpactData = calculateEditModeImpactData(filteredMetrics);
-    const filteredInlineModeImpactData = calculateInlineModeImpactData(filteredMetrics);
-    const filteredAskModeImpactData = calculateAskModeImpactData(filteredMetrics);
-    const filteredJoinedImpactData = calculateJoinedImpactData(filteredMetrics);
-
-    // Update the date range in stats based on filter
-    const { startDay, endDay } = getFilteredDateRange(dateRangeFilter, originalStats.reportStartDay, originalStats.reportEndDay);
-    const updatedStats = {
-      ...filteredStats,
-      reportStartDay: startDay,
-      reportEndDay: endDay
-    };
-
-    const result: FilteredMetricsData = {
-      metrics: filteredMetrics,
-      stats: updatedStats,
-      userSummaries: filteredUserSummaries,
-      engagementData: filteredEngagementData,
-      chatUsersData: filteredChatUsersData,
-      chatRequestsData: filteredChatRequestsData,
-      languageStats: filteredLanguageStats,
-      modelUsageData: filteredModelUsageData,
-      featureAdoptionData: filteredFeatureAdoptionData,
-      pruAnalysisData: filteredPRUAnalysisData,
-      agentModeHeatmapData: filteredAgentModeHeatmapData,
-      modelFeatureDistributionData: filteredModelFeatureDistributionData,
-      agentImpactData: filteredAgentImpactData,
-      codeCompletionImpactData: filteredCodeCompletionImpactData,
-      editModeImpactData: filteredEditModeImpactData,
-      inlineModeImpactData: filteredInlineModeImpactData,
-      askModeImpactData: filteredAskModeImpactData,
-      joinedImpactData: filteredJoinedImpactData
-    };
-    return result;
-  }, [rawMetrics, originalStats, dateRangeFilter, removeUnknownLanguages]);
+  const filteredData = useMetricsProcessing(
+    rawMetrics,
+    originalStats,
+    dateRangeFilter,
+    removeUnknownLanguages
+  );
 
   const { 
     metrics, 
@@ -183,8 +91,8 @@ export default function Home() {
     setError(null);
 
     try {
-      const fileContent = await file.text();
-      const parsedMetrics = parseMetricsFile(fileContent);
+      // Use streaming parser instead of loading full file into memory
+      const parsedMetrics = await parseMetricsStream(file);
       const calculatedStats = calculateStats(parsedMetrics);
 
       const firstMetric = parsedMetrics[0];
