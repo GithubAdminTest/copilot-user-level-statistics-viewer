@@ -10,13 +10,14 @@ import InsightsCard from './ui/InsightsCard';
 import { usePluginVersions } from '../hooks/usePluginVersions';
 import type { FeatureAdoptionData, AgentModeHeatmapData } from '../utils/metricCalculators';
 import type { MetricsStats, CopilotMetrics } from '../types/metrics';
+import type { VoidCallback } from '../types/events';
 
 interface CopilotAdoptionViewProps {
   featureAdoptionData: FeatureAdoptionData | null;
   agentModeHeatmapData: AgentModeHeatmapData[];
   stats: MetricsStats;
   metrics: CopilotMetrics[];
-  onBack: () => void;
+  onBack: VoidCallback;
 }
 
 export default function CopilotAdoptionView({ featureAdoptionData, agentModeHeatmapData, stats, metrics, onBack }: CopilotAdoptionViewProps) {

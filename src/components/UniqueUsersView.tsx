@@ -5,11 +5,12 @@ import { useUsernameTrieSearch } from '../hooks/useUsernameTrieSearch';
 import { useSortableTable } from '../hooks/useSortableTable';
 import SectionHeader from './ui/SectionHeader';
 import DashboardStatsCard from './ui/DashboardStatsCard';
+import type { VoidCallback } from '../types/events';
 
 interface UniqueUsersViewProps {
   users: UserSummary[];
   rawMetrics: CopilotMetrics[];
-  onBack: () => void;
+  onBack: VoidCallback;
   onUserClick: (userLogin: string, userId: number, userMetrics: CopilotMetrics[]) => void;
 }
 

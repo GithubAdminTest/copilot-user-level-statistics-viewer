@@ -11,6 +11,7 @@ import {
   DataTableBody,
   DataTableColumn,
 } from './ui/DataTable';
+import type { VoidCallback } from '../types/events';
 
 interface IDEStats {
   ide: string;
@@ -26,7 +27,7 @@ interface IDEStats {
 
 interface IDEViewProps {
   metrics: CopilotMetrics[];
-  onBack: () => void;
+  onBack: VoidCallback;
 }
 
 export default function IDEView({ metrics, onBack }: IDEViewProps) {

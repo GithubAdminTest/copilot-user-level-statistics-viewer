@@ -10,6 +10,7 @@ import ChatUsersChart from '../../charts/ChatUsersChart';
 import ChatRequestsChart from '../../charts/ChatRequestsChart';
 import { DateRangeFilter } from '../../../types/filters';
 import { ViewMode, VIEW_MODES } from '../../../types/navigation';
+import type { VoidCallback, ValueCallback, BooleanFilterCallback } from '../../../types/events';
 
 interface OverviewDashboardProps {
   stats: MetricsStats;
@@ -20,11 +21,11 @@ interface OverviewDashboardProps {
   chatRequestsData: DailyChatRequestsData[];
   dateRange: DateRangeFilter;
   removeUnknownLanguages: boolean;
-  onDateRangeChange: (range: DateRangeFilter) => void;
-  onRemoveUnknownLanguagesChange: (remove: boolean) => void;
-  onNavigate: (view: ViewMode) => void;
-  onModelSelect: (model: string) => void;
-  onReset: () => void;
+  onDateRangeChange: ValueCallback<DateRangeFilter>;
+  onRemoveUnknownLanguagesChange: BooleanFilterCallback;
+  onNavigate: ValueCallback<ViewMode>;
+  onModelSelect: ValueCallback<string>;
+  onReset: VoidCallback;
 }
 
 const OverviewDashboard: React.FC<OverviewDashboardProps> = ({

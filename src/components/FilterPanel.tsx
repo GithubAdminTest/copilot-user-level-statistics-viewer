@@ -2,14 +2,15 @@
 
 import { useState } from 'react';
 import { DateRangeFilter } from '../types/filters';
+import type { ValueCallback, BooleanFilterCallback } from '../types/events';
 
 interface FilterPanelProps {
-  onDateRangeChange: (filter: DateRangeFilter) => void;
+  onDateRangeChange: ValueCallback<DateRangeFilter>;
   currentFilter: DateRangeFilter;
   reportStartDay: string;
   reportEndDay: string;
   removeUnknownLanguages: boolean;
-  onRemoveUnknownLanguagesChange: (remove: boolean) => void;
+  onRemoveUnknownLanguagesChange: BooleanFilterCallback;
 }
 
 export default function FilterPanel({ 
