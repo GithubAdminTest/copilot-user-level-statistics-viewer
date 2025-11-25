@@ -12,6 +12,8 @@ export interface StatsAccumulator {
   languageEngagements: Map<string, number>;
   ideUsers: Map<string, Set<number>>;
   modelEngagements: Map<string, number>;
+  reportStartDay: string;
+  reportEndDay: string;
 }
 
 export function createStatsAccumulator(): StatsAccumulator {
@@ -20,6 +22,8 @@ export function createStatsAccumulator(): StatsAccumulator {
     languageEngagements: new Map(),
     ideUsers: new Map(),
     modelEngagements: new Map(),
+    reportStartDay: '',
+    reportEndDay: '',
   };
 }
 
@@ -67,7 +71,7 @@ export function accumulateModelEngagement(
 
 export function computeStats(
   accumulator: StatsAccumulator,
-  filteredMetrics: CopilotMetrics[]
+  totalRecords: number
 ): MetricsStats {
   let chatUsersCount = 0;
   let agentUsersCount = 0;
@@ -98,16 +102,14 @@ export function computeStats(
     ? { name: topModelEntry[0], engagements: topModelEntry[1] }
     : { name: 'N/A', engagements: 0 };
 
-  const firstRecord = filteredMetrics[0];
-
   return {
     uniqueUsers: accumulator.userUsageMap.size,
     chatUsers: chatUsersCount,
     agentUsers: agentUsersCount,
     completionOnlyUsers: completionOnlyUsersCount,
-    reportStartDay: firstRecord?.report_start_day || '',
-    reportEndDay: firstRecord?.report_end_day || '',
-    totalRecords: filteredMetrics.length,
+    reportStartDay: accumulator.reportStartDay,
+    reportEndDay: accumulator.reportEndDay,
+    totalRecords,
     topLanguage,
     topIde,
     topModel,
@@ -136,6 +138,10 @@ export function calculateStatsFromMetrics(
   const accumulator = createStatsAccumulator();
   const filterLanguage = options?.filterLanguage;
 
+  // Set report dates from first metric
+  accumulator.reportStartDay = metrics[0].report_start_day;
+  accumulator.reportEndDay = metrics[0].report_end_day;
+
   for (const metric of metrics) {
     accumulateUserUsage(accumulator, metric.user_id, metric.used_chat, metric.used_agent);
 
@@ -157,5 +163,5 @@ export function calculateStatsFromMetrics(
     }
   }
 
-  return computeStats(accumulator, metrics);
+  return computeStats(accumulator, metrics.length);
 }

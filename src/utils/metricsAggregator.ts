@@ -60,7 +60,6 @@ import {
 } from '../domain/calculators';
 
 export interface AggregatedMetrics {
-  metrics: CopilotMetrics[];
   stats: MetricsStats;
   userSummaries: UserSummary[];
   engagementData: DailyEngagementData[];
@@ -147,7 +146,7 @@ export function aggregateMetrics(
     reportEndDay?: string;
   } = {}
 ): AggregatedMetrics {
-  const filteredMetrics: CopilotMetrics[] = [];
+  let filteredMetricsCount = 0;
 
   // Date Filter Setup
   let startDate: Date | null = null;
@@ -176,7 +175,13 @@ export function aggregateMetrics(
       if (metricDate < startDate || metricDate > endDate) continue;
     }
 
-    filteredMetrics.push(metric);
+    filteredMetricsCount++;
+
+    // Capture report dates from first filtered metric
+    if (filteredMetricsCount === 1) {
+      statsAccumulator.reportStartDay = metric.report_start_day;
+      statsAccumulator.reportEndDay = metric.report_end_day;
+    }
 
     const date = metric.day;
     const userId = metric.user_id;
@@ -280,8 +285,7 @@ export function aggregateMetrics(
 
   // Compute all results
   return {
-    metrics: filteredMetrics,
-    stats: computeStats(statsAccumulator, filteredMetrics),
+    stats: computeStats(statsAccumulator, filteredMetricsCount),
     userSummaries: computeUserSummaries(userSummaryAccumulator),
     engagementData: computeEngagementData(engagementAccumulator),
     chatUsersData: computeChatUsersData(chatAccumulator),

@@ -18,7 +18,6 @@ import {
 import { CopilotMetrics, MetricsStats, UserSummary } from '../types/metrics';
 
 export interface FilteredMetricsData {
-  metrics: CopilotMetrics[];
   stats: MetricsStats | null;
   userSummaries: UserSummary[];
   engagementData: DailyEngagementData[];

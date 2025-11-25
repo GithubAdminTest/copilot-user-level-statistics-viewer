@@ -13,7 +13,6 @@ export function useMetricsProcessing(
   return useMemo(() => {
     if (!rawMetrics.length || !originalStats) {
       return {
-        metrics: [],
         stats: null,
         userSummaries: [],
         engagementData: [],
