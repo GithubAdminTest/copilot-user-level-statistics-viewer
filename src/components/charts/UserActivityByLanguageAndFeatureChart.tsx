@@ -1,8 +1,11 @@
 import React, { useState, useMemo } from 'react';
 import { Bar } from 'react-chartjs-2';
 import { ChartData, ChartOptions } from 'chart.js';
+import { registerChartJS } from '../../utils/chartSetup';
 import { CopilotMetrics } from '../../types/metrics';
 import { translateFeature } from '../../utils/featureTranslations';
+
+registerChartJS();
 
 // Derive an element type for language/feature aggregate entries
 export type LanguageFeatureAggregate = CopilotMetrics['totals_by_language_feature'][number];

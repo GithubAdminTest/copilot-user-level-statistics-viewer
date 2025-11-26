@@ -1,20 +1,13 @@
 'use client';
 
 import React from 'react';
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-  TooltipItem,
-} from 'chart.js';
+import { TooltipItem } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
+import { registerChartJS } from '../../utils/chartSetup';
 import type { ModeImpactData } from '../../utils/metricCalculators';
+import ChartContainer from '../ui/ChartContainer';
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
+registerChartJS();
 
 interface ModeImpactChartProps {
   data: ModeImpactData[];
@@ -40,14 +33,13 @@ export default function ModeImpactChart({
   deletedBorderColor = DEFAULT_DELETED_BORDER_COLOR,
   emptyStateMessage = 'No impact data available for this mode',
 }: ModeImpactChartProps) {
-  if (data.length === 0) {
-    return (
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">{title}</h3>
-        <div className="text-center py-8 text-gray-500">{emptyStateMessage}</div>
-      </div>
-    );
-  }
+  const totalAdded = data.reduce((sum, entry) => sum + entry.locAdded, 0);
+  const totalDeleted = data.reduce((sum, entry) => sum + entry.locDeleted, 0);
+  const netChange = totalAdded - totalDeleted;
+  const uniqueUsers = data[0]?.totalUniqueUsers ?? 0;
+  const averageDailyUsers = data.length > 0
+    ? Math.round(data.reduce((sum, entry) => sum + entry.userCount, 0) / data.length)
+    : 0;
 
   const chartData = {
     labels: data.map(entry => {
@@ -149,48 +141,24 @@ export default function ModeImpactChart({
     },
   };
 
-  const totalAdded = data.reduce((sum, entry) => sum + entry.locAdded, 0);
-  const totalDeleted = data.reduce((sum, entry) => sum + entry.locDeleted, 0);
-  const netChange = totalAdded - totalDeleted;
-  const uniqueUsers = data[0]?.totalUniqueUsers ?? 0;
-  const averageDailyUsers = Math.round(
-    data.reduce((sum, entry) => sum + entry.userCount, 0) / data.length
-  );
-
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-      <div className="flex justify-between items-start mb-6">
-        <div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">
-            {title} ({uniqueUsers} Unique Users)
-          </h3>
-          <p className="text-sm text-gray-600">{description}</p>
+    <ChartContainer
+      title={`${title} (${uniqueUsers} Unique Users)`}
+      description={description}
+      isEmpty={data.length === 0}
+      emptyState={emptyStateMessage}
+      stats={[
+        { label: '+ Total Added', value: totalAdded.toLocaleString(), color: 'text-green-600' },
+        { label: '- Total Deleted', value: totalDeleted.toLocaleString(), color: 'text-red-600' },
+        { label: 'Net Change', value: `${netChange >= 0 ? '+' : ''}${netChange.toLocaleString()}`, color: netChange >= 0 ? 'text-green-600' : 'text-red-600' },
+      ]}
+      footer={
+        <div className="text-xs text-gray-500">
+          Average daily users: {averageDailyUsers}
         </div>
-        <div className="text-right space-y-1">
-          <div className="text-sm">
-            <span className="font-medium text-green-600">+ Total Added:</span>{' '}
-            <span className="text-green-600">{totalAdded.toLocaleString()}</span>
-          </div>
-          <div className="text-sm">
-            <span className="font-medium text-red-600">- Total Deleted:</span>{' '}
-            <span className="text-red-600">{totalDeleted.toLocaleString()}</span>
-          </div>
-          <div className="text-sm text-gray-600">
-            <span className="font-medium">Net Change:</span>
-            <span className={`ml-1 ${netChange >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-              {netChange >= 0 ? '+' : ''}{netChange.toLocaleString()}
-            </span>
-          </div>
-        </div>
-      </div>
-
-      <div className="h-80">
-        <Bar data={chartData} options={options} />
-      </div>
-
-      <div className="mt-4 grid grid-cols-1 gap-2 text-xs text-gray-500">
-        <div>Average daily users: {averageDailyUsers}</div>
-      </div>
-    </div>
+      }
+    >
+      <Bar data={chartData} options={options} />
+    </ChartContainer>
   );
 }

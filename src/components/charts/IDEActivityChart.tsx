@@ -2,7 +2,10 @@
 import React, { useState } from 'react';
 import { Bar } from 'react-chartjs-2';
 import type { ChartData, ChartOptions } from 'chart.js';
+import { registerChartJS } from '../../utils/chartSetup';
 import { getIDEIcon, formatIDEName } from '../../utils/ideIcons';
+
+registerChartJS();
 
 interface IDEAggregateItem {
   ide: string;

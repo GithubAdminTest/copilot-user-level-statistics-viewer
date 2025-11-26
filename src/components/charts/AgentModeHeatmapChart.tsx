@@ -1,32 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-  TooltipItem
-} from 'chart.js';
+import { TooltipItem } from 'chart.js';
 import { Bar, Line } from 'react-chartjs-2';
+import { registerChartJS } from '../../utils/chartSetup';
 import { AgentModeHeatmapData } from '../../utils/metricCalculators';
 import InsightsCard from '../ui/InsightsCard';
 
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend
-);
+registerChartJS();
 
 interface AgentModeHeatmapChartProps {
   data: AgentModeHeatmapData[];

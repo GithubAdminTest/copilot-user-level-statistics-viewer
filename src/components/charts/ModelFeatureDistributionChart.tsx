@@ -1,30 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-  TooltipItem,
-  ArcElement
-} from 'chart.js';
+import { TooltipItem } from 'chart.js';
 import { Bar, Doughnut } from 'react-chartjs-2';
+import { registerChartJS } from '../../utils/chartSetup';
 import { ModelFeatureDistributionData } from '../../utils/metricCalculators';
 import InsightsCard from '../ui/InsightsCard';
 
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-  ArcElement
-);
+registerChartJS();
 
 interface ModelFeatureDistributionChartProps {
   data: ModelFeatureDistributionData[];

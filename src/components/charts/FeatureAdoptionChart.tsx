@@ -1,28 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-  TooltipItem
-} from 'chart.js';
+import { TooltipItem } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
+import { registerChartJS } from '../../utils/chartSetup';
 import { FeatureAdoptionData } from '../../utils/metricCalculators';
 import InsightsCard from '../ui/InsightsCard';
 
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend
-);
+registerChartJS();
 
 interface FeatureAdoptionChartProps {
   data: FeatureAdoptionData;

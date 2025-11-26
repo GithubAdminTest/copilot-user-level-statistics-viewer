@@ -1,30 +1,13 @@
 'use client';
 
 import React from 'react';
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-  TooltipItem,
-} from 'chart.js';
+import { TooltipItem } from 'chart.js';
 import { Line } from 'react-chartjs-2';
+import { registerChartJS } from '../../utils/chartSetup';
 import { DailyChatRequestsData } from '../../utils/metricCalculators';
 import ChartContainer from '../ui/ChartContainer';
 
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend
-);
+registerChartJS();
 
 interface ChatRequestsChartProps {
   data: DailyChatRequestsData[];
