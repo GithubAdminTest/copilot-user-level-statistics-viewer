@@ -5,6 +5,7 @@ import { TooltipItem } from 'chart.js';
 import { Bar, Doughnut } from 'react-chartjs-2';
 import { registerChartJS } from '../../utils/chartSetup';
 import { ModelFeatureDistributionData } from '../../utils/metricCalculators';
+import ChartContainer from '../ui/ChartContainer';
 import InsightsCard from '../ui/InsightsCard';
 
 registerChartJS();
@@ -13,19 +14,20 @@ interface ModelFeatureDistributionChartProps {
   data: ModelFeatureDistributionData[];
 }
 
+type ViewType = 'stacked' | 'grouped' | 'pie';
+
 export default function ModelFeatureDistributionChart({ data }: ModelFeatureDistributionChartProps) {
-  const [viewType, setViewType] = useState<'stacked' | 'grouped' | 'pie'>('stacked');
+  const [viewType, setViewType] = useState<ViewType>('stacked');
   const [selectedModel, setSelectedModel] = useState<string>('all');
   const [isExpanded, setIsExpanded] = useState(false);
 
   if (!data || data.length === 0) {
     return (
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h3 className="text-lg font-semibold text-gray-800 mb-4">Model Feature Distribution</h3>
+      <ChartContainer title="Model Feature Distribution">
         <div className="text-center text-gray-500 py-8">
           No model feature distribution data available
         </div>
-      </div>
+      </ChartContainer>
     );
   }
 
@@ -172,89 +174,82 @@ export default function ModelFeatureDistributionChart({ data }: ModelFeatureDist
   const totalAgentModeInteractions = filteredData.reduce((sum, d) => sum + d.features.agentMode, 0);
   const agentModeUsageRatio = totalInteractions > 0 ? totalAgentModeInteractions / totalInteractions : 0;
 
-  return (
-    <div className="bg-white rounded-lg shadow-md p-6">
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="text-lg font-semibold text-gray-800">Model Feature Distribution</h3>
-        <div className="flex gap-2">
-          <select
-            value={selectedModel}
-            onChange={(e) => setSelectedModel(e.target.value)}
-            className="px-3 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="all">All Models</option>
-            {data.map(model => (
-              <option key={model.model} value={model.model}>{model.modelDisplayName}</option>
-            ))}
-          </select>
-          <button
-            onClick={() => setViewType('stacked')}
-            className={`px-3 py-1 text-sm rounded ${
-              viewType === 'stacked' 
-                ? 'bg-blue-600 text-white' 
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-            }`}
-          >
-            Stacked
-          </button>
-          <button
-            onClick={() => setViewType('grouped')}
-            className={`px-3 py-1 text-sm rounded ${
-              viewType === 'grouped' 
-                ? 'bg-blue-600 text-white' 
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-            }`}
-          >
-            Grouped
-          </button>
-          {selectedModel !== 'all' && (
-            <button
-              onClick={() => setViewType('pie')}
-              className={`px-3 py-1 text-sm rounded ${
-                viewType === 'pie' 
-                  ? 'bg-blue-600 text-white' 
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-              }`}
-            >
-              Pie
-            </button>
-          )}
-        </div>
-      </div>
+  const summaryStats = [
+    {
+      value: totalInteractions,
+      label: 'Total Interactions',
+      sublabel: `${filteredData.length} models`,
+      color: 'text-blue-600' as const
+    },
+    {
+      value: Math.round(totalPRUs * 100) / 100,
+      label: 'Total PRUs',
+      sublabel: 'From all features',
+      color: 'text-purple-600' as const
+    },
+    {
+      value: `$${Math.round(totalServiceValue * 100) / 100}`,
+      label: 'Total Realised Service Value',
+      sublabel: 'Estimated',
+      color: 'text-green-600' as const
+    },
+    {
+      value: `${highestServiceValueModel?.multiplier || 0}x`,
+      label: 'Highest Multiplier',
+      sublabel: highestServiceValueModel?.modelDisplayName || 'N/A',
+      color: 'text-red-600' as const
+    }
+  ];
 
-      {/* Summary Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <div className="text-center">
-          <div className="text-2xl font-bold text-blue-600">{totalInteractions}</div>
-          <div className="text-sm text-gray-600">Total Interactions</div>
-          <div className="text-xs text-gray-500">{filteredData.length} models</div>
-        </div>
-        <div className="text-center">
-          <div className="text-2xl font-bold text-purple-600">{Math.round(totalPRUs * 100) / 100}</div>
-          <div className="text-sm text-gray-600">Total PRUs</div>
-          <div className="text-xs text-gray-500">From all features</div>
-        </div>
-        <div className="text-center">
-          <div className="text-2xl font-bold text-green-600">${Math.round(totalServiceValue * 100) / 100}</div>
-          <div className="text-sm text-gray-600">Total Realised Service Value</div>
-          <div className="text-xs text-gray-500">Estimated</div>
-        </div>
-        <div className="text-center">
-          <div className="text-2xl font-bold text-red-600">{highestServiceValueModel?.multiplier || 0}x</div>
-          <div className="text-sm text-gray-600">Highest Multiplier</div>
-          <div className="text-xs text-gray-500">{highestServiceValueModel?.modelDisplayName || 'N/A'}</div>
-        </div>
-      </div>
+  const headerActions = (
+    <div className="flex gap-2">
+      <select
+        value={selectedModel}
+        onChange={(e) => setSelectedModel(e.target.value)}
+        className="px-3 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+      >
+        <option value="all">All Models</option>
+        {data.map(model => (
+          <option key={model.model} value={model.model}>{model.modelDisplayName}</option>
+        ))}
+      </select>
+      <button
+        onClick={() => setViewType('stacked')}
+        className={`px-3 py-1 text-sm rounded ${
+          viewType === 'stacked' 
+            ? 'bg-blue-600 text-white' 
+            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+        }`}
+      >
+        Stacked
+      </button>
+      <button
+        onClick={() => setViewType('grouped')}
+        className={`px-3 py-1 text-sm rounded ${
+          viewType === 'grouped' 
+            ? 'bg-blue-600 text-white' 
+            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+        }`}
+      >
+        Grouped
+      </button>
+      {selectedModel !== 'all' && (
+        <button
+          onClick={() => setViewType('pie')}
+          className={`px-3 py-1 text-sm rounded ${
+            viewType === 'pie' 
+              ? 'bg-blue-600 text-white' 
+              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+          }`}
+        >
+          Pie
+        </button>
+      )}
+    </div>
+  );
 
-      {/* Chart */}
-      <div className="h-96">
-        {viewType === 'pie' ? (
-          <Doughnut data={chartData} options={options} />
-        ) : (
-          <Bar data={chartData} options={options} />
-        )}
-      </div>
-
+  const footer = (
+    <>
       {/* Progressive Disclosure Button */}
       {selectedModel === 'all' && filteredData.length > maxItemsToShow && (
         <div className="mt-4 text-center">
@@ -316,6 +311,23 @@ export default function ModelFeatureDistributionChart({ data }: ModelFeatureDist
           </p>
         </InsightsCard>
       </div>
-    </div>
+    </>
+  );
+
+  return (
+    <ChartContainer
+      title="Model Feature Distribution"
+      headerActions={headerActions}
+      summaryStats={summaryStats}
+      footer={footer}
+    >
+      <div className="h-96">
+        {viewType === 'pie' ? (
+          <Doughnut data={chartData} options={options} />
+        ) : (
+          <Bar data={chartData} options={options} />
+        )}
+      </div>
+    </ChartContainer>
   );
 }

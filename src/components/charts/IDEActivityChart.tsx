@@ -4,6 +4,7 @@ import { Bar } from 'react-chartjs-2';
 import type { ChartData, ChartOptions } from 'chart.js';
 import { registerChartJS } from '../../utils/chartSetup';
 import { getIDEIcon, formatIDEName } from '../../utils/ideIcons';
+import ChartContainer from '../ui/ChartContainer';
 
 registerChartJS();
 
@@ -45,25 +46,11 @@ export default function IDEActivityChart({
   const [isPluginTableExpanded, setIsPluginTableExpanded] = useState(false);
 
   if (!ideAggregates || ideAggregates.length === 0) {
-    return null; // nothing to render
+    return null;
   }
 
-  return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-      <h3 className="text-lg font-semibold text-gray-900 mb-4">{title}</h3>
-
-      {/* Bar Chart */}
-      {barChartData.datasets && barChartData.datasets.length > 0 && (
-        <div className="mb-6">
-          <div className="bg-gray-50 rounded-lg p-4">
-            <h4 className="text-sm font-medium text-gray-800 mb-4 text-center">Daily IDE Interactions</h4>
-            <div className="h-64">
-              <Bar data={barChartData} options={barChartOptions} />
-            </div>
-          </div>
-        </div>
-      )}
-
+  const footer = (
+    <>
       <div className="overflow-x-auto">
         <table className="w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
@@ -135,6 +122,21 @@ export default function IDEActivityChart({
           )}
         </div>
       )}
-    </div>
+    </>
+  );
+
+  return (
+    <ChartContainer title={title} footer={footer}>
+      {barChartData.datasets && barChartData.datasets.length > 0 && (
+        <div className="mb-6">
+          <div className="bg-gray-50 rounded-lg p-4">
+            <h4 className="text-sm font-medium text-gray-800 mb-4 text-center">Daily IDE Interactions</h4>
+            <div className="h-64">
+              <Bar data={barChartData} options={barChartOptions} />
+            </div>
+          </div>
+        </div>
+      )}
+    </ChartContainer>
   );
 }
