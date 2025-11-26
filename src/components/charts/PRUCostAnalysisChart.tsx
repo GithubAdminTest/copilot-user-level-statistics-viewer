@@ -6,6 +6,8 @@ import { Chart } from 'react-chartjs-2';
 import { registerChartJS } from '../../utils/chartSetup';
 import { createDualAxisChartOptions } from '../../utils/chartOptions';
 import { formatShortDate } from '../../utils/formatters';
+import { calculateTotal, calculateAverage, findMaxItem } from '../../utils/statsCalculators';
+import { chartColors } from '../../utils/chartColors';
 import { DailyPRUAnalysisData } from '../../utils/metricCalculators';
 import ChartContainer from '../ui/ChartContainer';
 import ChartToggleButtons from '../ui/ChartToggleButtons';
@@ -26,16 +28,14 @@ const VIEW_TYPE_OPTIONS = [
 export default function PRUCostAnalysisChart({ data }: PRUCostAnalysisChartProps) {
   const [viewType, setViewType] = useState<'cost' | 'percentage' | 'models'>('cost');
 
-  const totalPRUs = data.reduce((sum, d) => sum + d.totalPRUs, 0);
-  const totalCost = data.reduce((sum, d) => sum + d.serviceValue, 0);
-  const totalPRURequests = data.reduce((sum, d) => sum + d.pruRequests, 0);
-  const totalStandardRequests = data.reduce((sum, d) => sum + d.standardRequests, 0);
+  const totalPRUs = calculateTotal(data, d => d.totalPRUs);
+  const totalCost = calculateTotal(data, d => d.serviceValue);
+  const totalPRURequests = calculateTotal(data, d => d.pruRequests);
+  const totalStandardRequests = calculateTotal(data, d => d.standardRequests);
   const totalRequests = totalPRURequests + totalStandardRequests;
-  const avgPRUPercentage = data.length > 0 ? data.reduce((sum, d) => sum + d.pruPercentage, 0) / data.length : 0;
+  const avgPRUPercentage = calculateAverage(data, d => d.pruPercentage);
 
-  const maxCostDay = data.length > 0 
-    ? data.reduce((max, d) => d.serviceValue > max.serviceValue ? d : max, data[0])
-    : { serviceValue: 0, date: '' };
+  const maxCostDay = findMaxItem(data, d => d.serviceValue) ?? { serviceValue: 0, date: '' };
 
   const premiumModelAggregate = data.reduce((acc, day) => {
     for (const m of day.models) {
@@ -64,8 +64,8 @@ export default function PRUCostAnalysisChart({ data }: PRUCostAnalysisChartProps
               type: 'bar' as const,
               label: 'PRU Requests',
               data: data.map(d => d.pruRequests),
-              backgroundColor: 'rgba(239, 68, 68, 0.6)',
-              borderColor: 'rgb(239, 68, 68)',
+              backgroundColor: chartColors.red.alpha60,
+              borderColor: chartColors.red.solid,
               borderWidth: 1,
               yAxisID: 'y'
             },
@@ -73,8 +73,8 @@ export default function PRUCostAnalysisChart({ data }: PRUCostAnalysisChartProps
               type: 'line' as const,
               label: 'Service Value ($)',
               data: data.map(d => d.serviceValue),
-              backgroundColor: 'rgba(147, 51, 234, 0.2)',
-              borderColor: 'rgb(147, 51, 234)',
+              backgroundColor: chartColors.purple.alpha,
+              borderColor: chartColors.purple.solid,
               borderWidth: 3,
               fill: false,
               tension: 0.4,
@@ -90,8 +90,8 @@ export default function PRUCostAnalysisChart({ data }: PRUCostAnalysisChartProps
               type: 'bar' as const,
               label: 'PRU Requests',
               data: data.map(d => d.pruRequests),
-              backgroundColor: 'rgba(239, 68, 68, 0.6)',
-              borderColor: 'rgb(239, 68, 68)',
+              backgroundColor: chartColors.red.alpha60,
+              borderColor: chartColors.red.solid,
               borderWidth: 1,
               yAxisID: 'y'
             },
@@ -99,8 +99,8 @@ export default function PRUCostAnalysisChart({ data }: PRUCostAnalysisChartProps
               type: 'bar' as const,
               label: 'Standard Requests',
               data: data.map(d => d.standardRequests),
-              backgroundColor: 'rgba(34, 197, 94, 0.6)',
-              borderColor: 'rgb(34, 197, 94)',
+              backgroundColor: chartColors.green.alpha60,
+              borderColor: chartColors.green.solid,
               borderWidth: 1,
               yAxisID: 'y'
             },
@@ -108,8 +108,8 @@ export default function PRUCostAnalysisChart({ data }: PRUCostAnalysisChartProps
               type: 'line' as const,
               label: 'PRU Percentage (%)',
               data: data.map(d => d.pruPercentage),
-              backgroundColor: 'rgba(59, 130, 246, 0.2)',
-              borderColor: 'rgb(59, 130, 246)',
+              backgroundColor: chartColors.blue.alpha,
+              borderColor: chartColors.blue.solid,
               borderWidth: 3,
               fill: false,
               tension: 0.4,
@@ -125,8 +125,8 @@ export default function PRUCostAnalysisChart({ data }: PRUCostAnalysisChartProps
               type: 'bar' as const,
               label: 'Total PRUs',
               data: data.map(d => d.totalPRUs),
-              backgroundColor: 'rgba(168, 85, 247, 0.6)',
-              borderColor: 'rgb(168, 85, 247)',
+              backgroundColor: chartColors.violet.alpha60,
+              borderColor: chartColors.violet.solid,
               borderWidth: 1,
               yAxisID: 'y'
             },
@@ -134,8 +134,8 @@ export default function PRUCostAnalysisChart({ data }: PRUCostAnalysisChartProps
               type: 'line' as const,
               label: 'Top Model PRUs',
               data: data.map(d => d.topModelPRUs),
-              backgroundColor: 'rgba(245, 158, 11, 0.2)',
-              borderColor: 'rgb(245, 158, 11)',
+              backgroundColor: chartColors.amber.alpha,
+              borderColor: chartColors.amber.solid,
               borderWidth: 3,
               fill: false,
               tension: 0.4,

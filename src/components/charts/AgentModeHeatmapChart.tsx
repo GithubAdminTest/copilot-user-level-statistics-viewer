@@ -6,6 +6,8 @@ import { Bar, Line } from 'react-chartjs-2';
 import { registerChartJS } from '../../utils/chartSetup';
 import { createBaseChartOptions, createDualAxisChartOptions } from '../../utils/chartOptions';
 import { formatShortDate } from '../../utils/formatters';
+import { calculateTotal, calculateAverage, findMaxItem, findMaxValue } from '../../utils/statsCalculators';
+import { chartColors } from '../../utils/chartColors';
 import { AgentModeHeatmapData } from '../../utils/metricCalculators';
 import ChartContainer from '../ui/ChartContainer';
 import ChartToggleButtons from '../ui/ChartToggleButtons';
@@ -29,7 +31,7 @@ const getIntensityColor = (intensity: number) => {
     'rgb(254, 202, 202)',
     'rgb(252, 165, 165)',
     'rgb(248, 113, 113)',
-    'rgb(239, 68, 68)',
+    chartColors.red.solid,
     'rgb(220, 38, 38)'
   ];
   return colors[Math.min(intensity, 5)];
@@ -38,13 +40,11 @@ const getIntensityColor = (intensity: number) => {
 export default function AgentModeHeatmapChart({ data }: AgentModeHeatmapChartProps) {
   const [chartType, setChartType] = useState<'heatmap' | 'line' | 'bar'>('heatmap');
 
-  const totalRequests = data.reduce((sum, d) => sum + d.agentModeRequests, 0);
-  const peakDay = data.length > 0
-    ? data.reduce((max, d) => d.agentModeRequests > max.agentModeRequests ? d : max, data[0])
-    : { agentModeRequests: 0, date: '' };
-  const avgRequestsPerDay = data.length > 0 ? Math.round((totalRequests / data.length) * 100) / 100 : 0;
-  const totalUserDays = data.reduce((sum, d) => sum + d.uniqueUsers, 0);
-  const maxIntensity = data.length > 0 ? Math.max(...data.map(d => d.intensity)) : 0;
+  const totalRequests = calculateTotal(data, d => d.agentModeRequests);
+  const peakDay = findMaxItem(data, d => d.agentModeRequests) ?? { agentModeRequests: 0, date: '' };
+  const avgRequestsPerDay = calculateAverage(data, d => d.agentModeRequests);
+  const totalUserDays = calculateTotal(data, d => d.uniqueUsers);
+  const maxIntensity = findMaxValue(data, d => d.intensity);
 
   const chartData = chartType === 'heatmap' ? {
     labels: data.map(d => formatShortDate(d.date)),
@@ -52,7 +52,7 @@ export default function AgentModeHeatmapChart({ data }: AgentModeHeatmapChartPro
       label: 'Agent Mode Requests',
       data: data.map(d => d.agentModeRequests),
       backgroundColor: data.map(d => getIntensityColor(d.intensity)),
-      borderColor: 'rgb(239, 68, 68)',
+      borderColor: chartColors.red.solid,
       borderWidth: 1
     }]
   } : {
@@ -61,8 +61,8 @@ export default function AgentModeHeatmapChart({ data }: AgentModeHeatmapChartPro
       {
         label: 'Agent Mode Requests',
         data: data.map(d => d.agentModeRequests),
-        backgroundColor: 'rgba(239, 68, 68, 0.6)',
-        borderColor: 'rgb(239, 68, 68)',
+        backgroundColor: chartColors.red.alpha60,
+        borderColor: chartColors.red.solid,
         borderWidth: 2,
         tension: 0.4,
         yAxisID: 'y'
@@ -70,8 +70,8 @@ export default function AgentModeHeatmapChart({ data }: AgentModeHeatmapChartPro
       {
         label: 'Unique Users',
         data: data.map(d => d.uniqueUsers),
-        backgroundColor: 'rgba(59, 130, 246, 0.6)',
-        borderColor: 'rgb(59, 130, 246)',
+        backgroundColor: chartColors.blue.alpha60,
+        borderColor: chartColors.blue.solid,
         borderWidth: 2,
         tension: 0.4,
         yAxisID: 'y1'

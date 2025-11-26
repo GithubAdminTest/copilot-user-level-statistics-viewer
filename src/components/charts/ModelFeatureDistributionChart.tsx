@@ -5,6 +5,8 @@ import { TooltipItem } from 'chart.js';
 import { Bar, Doughnut } from 'react-chartjs-2';
 import { registerChartJS } from '../../utils/chartSetup';
 import { createBaseChartOptions } from '../../utils/chartOptions';
+import { featureColors as baseFeatureColors } from '../../utils/chartColors';
+import { calculateTotal } from '../../utils/statsCalculators';
 import { ModelFeatureDistributionData } from '../../utils/metricCalculators';
 import ChartContainer from '../ui/ChartContainer';
 import ChartToggleButtons from '../ui/ChartToggleButtons';
@@ -50,15 +52,15 @@ export default function ModelFeatureDistributionChart({ data }: ModelFeatureDist
   const maxItemsToShow = 5;
   const displayData = isExpanded ? filteredData : filteredData.slice(0, maxItemsToShow);
 
-  // Feature colors
-  const featureColors = {
-    agentMode: 'rgb(239, 68, 68)',     // red
-    askMode: 'rgb(59, 130, 246)',      // blue
-    editMode: 'rgb(245, 158, 11)',     // yellow
-    inlineMode: 'rgb(168, 85, 247)',   // purple
-    codeCompletion: 'rgb(34, 197, 94)', // green
-    codeReview: 'rgb(20, 184, 166)',   // teal
-    other: 'rgb(156, 163, 175)'        // gray
+  // Feature colors using centralized palette
+  const featureColorMap = {
+    agentMode: baseFeatureColors.agentMode.solid,
+    askMode: baseFeatureColors.askMode.solid,
+    editMode: baseFeatureColors.editMode.solid,
+    inlineMode: baseFeatureColors.inlineMode.solid,
+    codeCompletion: baseFeatureColors.codeCompletion.solid,
+    codeReview: baseFeatureColors.codeReview.solid,
+    other: baseFeatureColors.other.solid
   };
 
   const featureLabels = {
@@ -83,7 +85,7 @@ export default function ModelFeatureDistributionChart({ data }: ModelFeatureDist
         labels: features.map(([key]) => featureLabels[key as keyof typeof featureLabels]),
         datasets: [{
           data: features.map(([, value]) => value),
-          backgroundColor: features.map(([key]) => featureColors[key as keyof typeof featureColors]),
+          backgroundColor: features.map(([key]) => featureColorMap[key as keyof typeof featureColorMap]),
           borderWidth: 2,
           borderColor: '#ffffff'
         }]
@@ -99,8 +101,8 @@ export default function ModelFeatureDistributionChart({ data }: ModelFeatureDist
         datasets: features.map(feature => ({
           label: featureLabels[feature],
           data: displayData.map(d => d.features[feature]),
-          backgroundColor: featureColors[feature],
-          borderColor: featureColors[feature],
+          backgroundColor: featureColorMap[feature],
+          borderColor: featureColorMap[feature],
             borderWidth: 1
         }))
       };
@@ -182,13 +184,15 @@ export default function ModelFeatureDistributionChart({ data }: ModelFeatureDist
   };
 
   // Calculate summary statistics
-  const totalInteractions = filteredData.reduce((sum, d) => sum + d.totalInteractions, 0);
-  const totalPRUs = filteredData.reduce((sum, d) => sum + d.totalPRUs, 0);
-  const totalServiceValue = filteredData.reduce((sum, d) => sum + d.serviceValue, 0);
-  const highestServiceValueModel = filteredData.reduce((max, d) => d.serviceValue > max.serviceValue ? d : max, filteredData[0]);
+  const totalInteractions = calculateTotal(filteredData, d => d.totalInteractions);
+  const totalPRUs = calculateTotal(filteredData, d => d.totalPRUs);
+  const totalServiceValue = calculateTotal(filteredData, d => d.serviceValue);
+  const highestServiceValueModel = filteredData.length > 0
+    ? filteredData.reduce((max, d) => d.serviceValue > max.serviceValue ? d : max, filteredData[0])
+    : null;
 
   const AGENT_MODE_USAGE_THRESHOLD = 0.20; // 20%
-  const totalAgentModeInteractions = filteredData.reduce((sum, d) => sum + d.features.agentMode, 0);
+  const totalAgentModeInteractions = calculateTotal(filteredData, d => d.features.agentMode);
   const agentModeUsageRatio = totalInteractions > 0 ? totalAgentModeInteractions / totalInteractions : 0;
 
   const summaryStats = [

@@ -4,6 +4,10 @@ import { TooltipItem } from 'chart.js';
 import { Line } from 'react-chartjs-2';
 import { registerChartJS } from '../../utils/chartSetup';
 import { createBaseChartOptions, yAxisFormatters } from '../../utils/chartOptions';
+import { createFilledLineDataset } from '../../utils/chartStyles';
+import { chartColors } from '../../utils/chartColors';
+import { formatShortDate } from '../../utils/formatters';
+import { calculateAverage, findMaxValue, findMinValue } from '../../utils/statsCalculators';
 import { DailyEngagementData } from '../../utils/metricCalculators';
 import ChartContainer from '../ui/ChartContainer';
 
@@ -14,41 +18,14 @@ interface EngagementChartProps {
 }
 
 export default function EngagementChart({ data }: EngagementChartProps) {
-  const avgEngagement = data.length > 0 
-    ? Math.round((data.reduce((sum, d) => sum + d.engagementPercentage, 0) / data.length) * 100) / 100
-    : 0;
-
-  const maxEngagement = data.length > 0 
-    ? Math.max(...data.map(d => d.engagementPercentage))
-    : 0;
-
-  const minEngagement = data.length > 0 
-    ? Math.min(...data.map(d => d.engagementPercentage))
-    : 0;
+  const avgEngagement = calculateAverage(data, d => d.engagementPercentage);
+  const maxEngagement = findMaxValue(data, d => d.engagementPercentage);
+  const minEngagement = findMinValue(data, d => d.engagementPercentage);
 
   const chartData = {
-    labels: data.map(d => {
-      const date = new Date(d.date);
-      return date.toLocaleDateString('en-US', { 
-        month: 'short', 
-        day: 'numeric' 
-      });
-    }),
+    labels: data.map(d => formatShortDate(d.date)),
     datasets: [
-      {
-        label: 'User Engagement %',
-        data: data.map(d => d.engagementPercentage),
-        borderColor: 'rgb(59, 130, 246)',
-        backgroundColor: 'rgba(59, 130, 246, 0.1)',
-        borderWidth: 2,
-        fill: true,
-        tension: 0.1,
-        pointBackgroundColor: 'rgb(59, 130, 246)',
-        pointBorderColor: 'white',
-        pointBorderWidth: 2,
-        pointRadius: 4,
-        pointHoverRadius: 6,
-      },
+      createFilledLineDataset(chartColors.blue.solid, 'User Engagement %', data.map(d => d.engagementPercentage)),
     ],
   };
 

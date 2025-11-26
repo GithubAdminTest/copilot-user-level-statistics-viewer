@@ -4,6 +4,8 @@ import { TooltipItem } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
 import { registerChartJS } from '../../utils/chartSetup';
 import { createStackedBarChartOptions, yAxisFormatters } from '../../utils/chartOptions';
+import { formatShortDate } from '../../utils/formatters';
+import { calculateTotal, calculateAverage } from '../../utils/statsCalculators';
 import type { ModeImpactData } from '../../utils/metricCalculators';
 import ChartContainer from '../ui/ChartContainer';
 
@@ -33,22 +35,14 @@ export default function ModeImpactChart({
   deletedBorderColor = DEFAULT_DELETED_BORDER_COLOR,
   emptyStateMessage = 'No impact data available for this mode',
 }: ModeImpactChartProps) {
-  const totalAdded = data.reduce((sum, entry) => sum + entry.locAdded, 0);
-  const totalDeleted = data.reduce((sum, entry) => sum + entry.locDeleted, 0);
+  const totalAdded = calculateTotal(data, d => d.locAdded);
+  const totalDeleted = calculateTotal(data, d => d.locDeleted);
   const netChange = totalAdded - totalDeleted;
   const uniqueUsers = data[0]?.totalUniqueUsers ?? 0;
-  const averageDailyUsers = data.length > 0
-    ? Math.round(data.reduce((sum, entry) => sum + entry.userCount, 0) / data.length)
-    : 0;
+  const averageDailyUsers = Math.round(calculateAverage(data, d => d.userCount, 0));
 
   const chartData = {
-    labels: data.map(entry => {
-      const date = new Date(entry.date);
-      return date.toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-      });
-    }),
+    labels: data.map(entry => formatShortDate(entry.date)),
     datasets: [
       {
         label: 'Lines Deleted',

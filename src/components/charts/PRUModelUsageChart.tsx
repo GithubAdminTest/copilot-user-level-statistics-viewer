@@ -6,6 +6,8 @@ import { Chart } from 'react-chartjs-2';
 import { registerChartJS } from '../../utils/chartSetup';
 import { createBaseChartOptions } from '../../utils/chartOptions';
 import { formatShortDate } from '../../utils/formatters';
+import { calculateTotal, calculateAverage } from '../../utils/statsCalculators';
+import { chartColors } from '../../utils/chartColors';
 import { DailyModelUsageData } from '../../utils/metricCalculators';
 import ChartContainer from '../ui/ChartContainer';
 import ChartToggleButtons from '../ui/ChartToggleButtons';
@@ -25,12 +27,14 @@ const CHART_TYPE_OPTIONS = [
 export default function PRUModelUsageChart({ data }: PRUModelUsageChartProps) {
   const [chartType, setChartType] = useState<'area' | 'bar'>('area');
 
-  const totalPRURequests = data.reduce((sum, d) => sum + d.pruModels, 0);
-  const totalStandardRequests = data.reduce((sum, d) => sum + d.standardModels, 0);
-  const totalUnknownRequests = data.reduce((sum, d) => sum + d.unknownModels, 0);
-  const totalPRUs = data.reduce((sum, d) => sum + d.totalPRUs, 0);
-  const totalCost = data.reduce((sum, d) => sum + d.serviceValue, 0);
+  const totalPRURequests = calculateTotal(data, d => d.pruModels);
+  const totalStandardRequests = calculateTotal(data, d => d.standardModels);
+  const totalUnknownRequests = calculateTotal(data, d => d.unknownModels);
+  const totalPRUs = calculateTotal(data, d => d.totalPRUs);
+  const totalCost = calculateTotal(data, d => d.serviceValue);
   const grandTotal = totalPRURequests + totalStandardRequests + totalUnknownRequests;
+  const avgPRUs = calculateAverage(data, d => d.totalPRUs);
+  const avgCost = calculateAverage(data, d => d.serviceValue);
 
   const chartData = {
     labels: data.map(d => formatShortDate(d.date)),
@@ -38,8 +42,8 @@ export default function PRUModelUsageChart({ data }: PRUModelUsageChartProps) {
       {
         label: 'Premium Models (PRU)',
         data: data.map(d => d.pruModels),
-        backgroundColor: 'rgba(239, 68, 68, 0.6)',
-        borderColor: 'rgb(239, 68, 68)',
+        backgroundColor: chartColors.red.alpha60,
+        borderColor: chartColors.red.solid,
         borderWidth: 2,
         fill: chartType === 'area',
         tension: 0.4
@@ -47,8 +51,8 @@ export default function PRUModelUsageChart({ data }: PRUModelUsageChartProps) {
       {
         label: 'Standard Models (GPT-4.1/4o)',
         data: data.map(d => d.standardModels),
-        backgroundColor: 'rgba(34, 197, 94, 0.6)',
-        borderColor: 'rgb(34, 197, 94)',
+        backgroundColor: chartColors.green.alpha60,
+        borderColor: chartColors.green.solid,
         borderWidth: 2,
         fill: chartType === 'area',
         tension: 0.4
@@ -56,8 +60,8 @@ export default function PRUModelUsageChart({ data }: PRUModelUsageChartProps) {
       {
         label: 'Unknown Models',
         data: data.map(d => d.unknownModels),
-        backgroundColor: 'rgba(156, 163, 175, 0.6)',
-        borderColor: 'rgb(156, 163, 175)',
+        backgroundColor: chartColors.gray.alpha60,
+        borderColor: chartColors.gray.solid,
         borderWidth: 2,
         fill: chartType === 'area',
         tension: 0.4
@@ -87,8 +91,8 @@ export default function PRUModelUsageChart({ data }: PRUModelUsageChartProps) {
         { value: totalPRURequests, label: 'PRU Requests', sublabel: grandTotal > 0 ? `${Math.round((totalPRURequests / grandTotal) * 100)}%` : '0%', colorClass: 'text-red-600' },
         { value: totalStandardRequests, label: 'Standard Requests', sublabel: grandTotal > 0 ? `${Math.round((totalStandardRequests / grandTotal) * 100)}%` : '0%', colorClass: 'text-green-600' },
         { value: totalUnknownRequests, label: 'Unknown Requests', sublabel: grandTotal > 0 ? `${Math.round((totalUnknownRequests / grandTotal) * 100)}%` : '0%', colorClass: 'text-gray-600' },
-        { value: Math.round(totalPRUs * 100) / 100, label: 'Total PRUs', sublabel: `Avg: ${data.length > 0 ? Math.round((totalPRUs / data.length) * 100) / 100 : 0}/day`, colorClass: 'text-blue-600' },
-        { value: `$${Math.round(totalCost * 100) / 100}`, label: 'Service Value', sublabel: `Avg: $${data.length > 0 ? Math.round((totalCost / data.length) * 100) / 100 : 0}/day`, colorClass: 'text-purple-600' },
+        { value: Math.round(totalPRUs * 100) / 100, label: 'Total PRUs', sublabel: `Avg: ${avgPRUs}/day`, colorClass: 'text-blue-600' },
+        { value: `$${Math.round(totalCost * 100) / 100}`, label: 'Service Value', sublabel: `Avg: $${avgCost}/day`, colorClass: 'text-purple-600' },
       ]}
       chartHeight="h-96"
       footer={

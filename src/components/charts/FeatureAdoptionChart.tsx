@@ -5,6 +5,7 @@ import { TooltipItem } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
 import { registerChartJS } from '../../utils/chartSetup';
 import { createHorizontalBarChartOptions } from '../../utils/chartOptions';
+import { chartColors } from '../../utils/chartColors';
 import { FeatureAdoptionData } from '../../utils/metricCalculators';
 import ChartContainer from '../ui/ChartContainer';
 import ChartToggleButtons from '../ui/ChartToggleButtons';
@@ -25,14 +26,14 @@ export default function FeatureAdoptionChart({ data }: FeatureAdoptionChartProps
   const [viewType, setViewType] = useState<'absolute' | 'percentage'>('absolute');
 
   const features = [
-    { name: 'Total Users', count: data?.totalUsers || 0, color: 'rgb(99, 102, 241)', description: 'All users in the dataset' },
-    { name: 'Code Completion', count: data?.completionUsers || 0, color: 'rgb(34, 197, 94)', description: 'Users who used code completion' },
-    { name: 'Chat Features', count: data?.chatUsers || 0, color: 'rgb(59, 130, 246)', description: 'Users who used any chat feature' },
-    { name: 'Ask Mode', count: data?.askModeUsers || 0, color: 'rgb(147, 51, 234)', description: 'Users who used chat ask mode' },
-    { name: 'Edit Mode', count: data?.editModeUsers || 0, color: 'rgb(245, 158, 11)', description: 'Users who used chat edit mode' },
-    { name: 'Agent Mode', count: data?.agentModeUsers || 0, color: 'rgb(239, 68, 68)', description: 'Users who used agent mode' },
-    { name: 'Inline Chat', count: data?.inlineModeUsers || 0, color: 'rgb(168, 85, 247)', description: 'Users who used inline chat' },
-    { name: 'Code Review', count: data?.codeReviewUsers || 0, color: 'rgb(20, 184, 166)', description: 'Users who used code review features' }
+    { name: 'Total Users', count: data?.totalUsers || 0, color: chartColors.indigo.solid, description: 'All users in the dataset' },
+    { name: 'Code Completion', count: data?.completionUsers || 0, color: chartColors.green.solid, description: 'Users who used code completion' },
+    { name: 'Chat Features', count: data?.chatUsers || 0, color: chartColors.blue.solid, description: 'Users who used any chat feature' },
+    { name: 'Ask Mode', count: data?.askModeUsers || 0, color: chartColors.purple.solid, description: 'Users who used chat ask mode' },
+    { name: 'Edit Mode', count: data?.editModeUsers || 0, color: chartColors.amber.solid, description: 'Users who used chat edit mode' },
+    { name: 'Agent Mode', count: data?.agentModeUsers || 0, color: chartColors.red.solid, description: 'Users who used agent mode' },
+    { name: 'Inline Chat', count: data?.inlineModeUsers || 0, color: chartColors.violet.solid, description: 'Users who used inline chat' },
+    { name: 'Code Review', count: data?.codeReviewUsers || 0, color: chartColors.teal.solid, description: 'Users who used code review features' }
   ];
 
   const totalUsers = data?.totalUsers || 0;
