@@ -1,10 +1,11 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Bar } from 'react-chartjs-2';
-import type { ChartData, ChartOptions } from 'chart.js';
+import type { ChartOptions, TooltipItem } from 'chart.js';
 import { registerChartJS } from '../../utils/chartSetup';
 import { getIDEIcon, formatIDEName } from '../../utils/ideIcons';
 import ChartContainer from '../ui/ChartContainer';
+import type { CopilotMetrics } from '../../types/metrics';
 
 registerChartJS();
 
@@ -20,9 +21,7 @@ interface IDEAggregateItem {
 }
 
 interface IDEActivityChartProps {
-  ideAggregates: IDEAggregateItem[];
-  barChartData: ChartData<'bar'>;
-  barChartOptions: ChartOptions<'bar'>;
+  userMetrics: CopilotMetrics[];
   title?: string;
   pluginVersions?: {
     plugin: string;
@@ -31,23 +30,138 @@ interface IDEActivityChartProps {
   }[];
 }
 
+const IDE_COLORS: Record<string, string> = {
+  'vscode': '#007ACC',
+  'visual_studio': '#5C2D91',
+  'jetbrains': '#FE315D',
+  'vim': '#019733',
+  'neovim': '#57A143',
+  'emacs': '#7F5AB6',
+  'eclipse': '#66595C',
+  'sublime_text': '#FF9800',
+  'xcode': '#1575F9',
+  'intellij': '#FE315D',
+};
+
+const FALLBACK_COLORS = [
+  '#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6',
+  '#F97316', '#06B6D4', '#84CC16', '#EC4899', '#14B8A6'
+];
+
 /**
  * IDEActivityChart
  * Reusable section displaying a daily interactions stacked bar chart (by IDE) plus
  * a table summarizing aggregate metrics per IDE.
  */
 export default function IDEActivityChart({
-  ideAggregates,
-  barChartData,
-  barChartOptions,
+  userMetrics,
   title = 'Activity by IDE',
   pluginVersions
 }: IDEActivityChartProps) {
   const [isPluginTableExpanded, setIsPluginTableExpanded] = useState(false);
 
-  if (!ideAggregates || ideAggregates.length === 0) {
-    return null;
-  }
+  const ideAggregates = useMemo((): IDEAggregateItem[] => {
+    const aggregateMap = new Map<string, IDEAggregateItem>();
+
+    for (const metric of userMetrics) {
+      for (const ideData of metric.totals_by_ide) {
+        const existing = aggregateMap.get(ideData.ide);
+        if (existing) {
+          existing.user_initiated_interaction_count += ideData.user_initiated_interaction_count;
+          existing.code_generation_activity_count += ideData.code_generation_activity_count;
+          existing.code_acceptance_activity_count += ideData.code_acceptance_activity_count;
+          existing.loc_added_sum += ideData.loc_added_sum;
+          existing.loc_deleted_sum += ideData.loc_deleted_sum;
+          existing.loc_suggested_to_add_sum += ideData.loc_suggested_to_add_sum;
+          existing.loc_suggested_to_delete_sum += ideData.loc_suggested_to_delete_sum;
+        } else {
+          aggregateMap.set(ideData.ide, {
+            ide: ideData.ide,
+            user_initiated_interaction_count: ideData.user_initiated_interaction_count,
+            code_generation_activity_count: ideData.code_generation_activity_count,
+            code_acceptance_activity_count: ideData.code_acceptance_activity_count,
+            loc_added_sum: ideData.loc_added_sum,
+            loc_deleted_sum: ideData.loc_deleted_sum,
+            loc_suggested_to_add_sum: ideData.loc_suggested_to_add_sum,
+            loc_suggested_to_delete_sum: ideData.loc_suggested_to_delete_sum,
+          });
+        }
+      }
+    }
+
+    return Array.from(aggregateMap.values()).sort((a, b) =>
+      b.user_initiated_interaction_count - a.user_initiated_interaction_count
+    );
+  }, [userMetrics]);
+
+  const barChartData = useMemo(() => {
+    const allIDEs = Array.from(
+      new Set(userMetrics.flatMap(metric => metric.totals_by_ide.map(ide => ide.ide)))
+    ).sort();
+
+    const allDays = userMetrics.map(metric => metric.day).sort();
+
+    const datasets = allIDEs.map((ide, index) => {
+      const data = allDays.map(day => {
+        const dayMetric = userMetrics.find(m => m.day === day);
+        const ideData = dayMetric?.totals_by_ide.find(i => i.ide === ide);
+        return ideData?.user_initiated_interaction_count || 0;
+      });
+
+      return {
+        label: formatIDEName(ide),
+        data: data,
+        backgroundColor: IDE_COLORS[ide] || FALLBACK_COLORS[index % FALLBACK_COLORS.length],
+        borderColor: IDE_COLORS[ide] || FALLBACK_COLORS[index % FALLBACK_COLORS.length],
+        borderWidth: 1,
+      };
+    }).filter(dataset => dataset.data.some(value => value > 0));
+
+    return {
+      labels: allDays.map(day => new Date(day).toLocaleDateString()),
+      datasets: datasets,
+    };
+  }, [userMetrics]);
+
+  const barChartOptions: ChartOptions<'bar'> = useMemo(() => ({
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'top' as const,
+        labels: {
+          padding: 20,
+          usePointStyle: true,
+        }
+      },
+      tooltip: {
+        callbacks: {
+          label: function(context: TooltipItem<'bar'>) {
+            const label = context.dataset.label || '';
+            const value = context.parsed.y || 0;
+            return `${label}: ${value.toLocaleString()} interactions`;
+          }
+        }
+      }
+    },
+    scales: {
+      x: {
+        title: {
+          display: true,
+          text: 'Date'
+        }
+      },
+      y: {
+        title: {
+          display: true,
+          text: 'Interactions'
+        },
+        beginAtZero: true
+      }
+    }
+  }), []);
+
+  const isEmpty = ideAggregates.length === 0;
 
   const footer = (
     <>
@@ -126,7 +240,7 @@ export default function IDEActivityChart({
   );
 
   return (
-    <ChartContainer title={title} footer={footer}>
+    <ChartContainer title={title} footer={!isEmpty ? footer : undefined} isEmpty={isEmpty} emptyState="No IDE activity data available.">
       {barChartData.datasets && barChartData.datasets.length > 0 && (
         <div className="mb-6">
           <div className="bg-gray-50 rounded-lg p-4">
