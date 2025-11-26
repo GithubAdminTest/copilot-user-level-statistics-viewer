@@ -74,9 +74,9 @@ export default function ChartContainer({
       </div>
 
       {summaryStats && summaryStats.length > 0 && (
-        <div className={`grid grid-cols-2 md:grid-cols-${Math.min(summaryStats.length, 5)} gap-4 mb-6`}>
+        <div className="flex flex-wrap justify-center gap-4 md:gap-8 mb-6">
           {summaryStats.map((stat, index) => (
-            <div key={index} className="text-center">
+            <div key={index} className="text-center min-w-[100px]">
               <div className={`text-2xl font-bold ${stat.colorClass || 'text-gray-900'}`}>
                 {stat.value}
               </div>
