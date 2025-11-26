@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { TooltipItem } from 'chart.js';
 import { Bar, Doughnut } from 'react-chartjs-2';
 import { registerChartJS } from '../../utils/chartSetup';
+import { createBaseChartOptions } from '../../utils/chartOptions';
 import { ModelFeatureDistributionData } from '../../utils/metricCalculators';
 import ChartContainer from '../ui/ChartContainer';
 import InsightsCard from '../ui/InsightsCard';
@@ -109,9 +110,47 @@ export default function ModelFeatureDistributionChart({ data }: ModelFeatureDist
 
   const chartData = getChartData();
 
-  const options = {
+  const tooltipAfterBody = (context: TooltipItem<'bar' | 'doughnut'>[]) => {
+    if (viewType === 'pie') {
+      return '';
+    }
+    const dataIndex = context[0].dataIndex;
+    const modelData = displayData[dataIndex];
+    if (!modelData) return '';
+    
+    return [
+      '',
+      `Total Interactions: ${modelData.totalInteractions}`,
+      `Total PRUs: ${modelData.totalPRUs}`,
+      `Service Value: $${modelData.serviceValue}`,
+      `Multiplier: ${modelData.multiplier}x`
+    ];
+  };
+
+  const options = viewType === 'pie' ? {
     responsive: true,
     maintainAspectRatio: false,
+    plugins: {
+      title: {
+        display: true,
+        text: `${data.find(d => d.model === selectedModel)?.modelDisplayName} Feature Usage`
+      },
+      legend: {
+        position: 'top' as const,
+        display: true
+      },
+      tooltip: {
+        callbacks: {
+          afterBody: tooltipAfterBody
+        }
+      }
+    },
+  } : {
+    ...createBaseChartOptions({
+      xAxisLabel: viewType === 'stacked' ? 'Models' : 'Features',
+      yAxisLabel: 'Number of Interactions',
+      stacked: viewType === 'stacked',
+    }),
     plugins: {
       title: {
         display: true,
@@ -125,43 +164,10 @@ export default function ModelFeatureDistributionChart({ data }: ModelFeatureDist
       },
       tooltip: {
         callbacks: {
-          afterBody: function(context: TooltipItem<'bar' | 'doughnut'>[]) {
-            if (viewType === 'pie') {
-              return '';
-            }
-            const dataIndex = context[0].dataIndex;
-            const modelData = displayData[dataIndex];
-            if (!modelData) return '';
-            
-            return [
-              '',
-              `Total Interactions: ${modelData.totalInteractions}`,
-              `Total PRUs: ${modelData.totalPRUs}`,
-              `Service Value: $${modelData.serviceValue}`,
-              `Multiplier: ${modelData.multiplier}x`
-            ];
-          }
+          afterBody: tooltipAfterBody
         }
       }
     },
-    scales: viewType === 'pie' ? {} : {
-      x: {
-        display: true,
-        title: {
-          display: true,
-          text: viewType === 'stacked' ? 'Models' : 'Features'
-        }
-      },
-      y: {
-        display: true,
-        title: {
-          display: true,
-          text: 'Number of Interactions'
-        },
-        stacked: viewType === 'stacked',
-        beginAtZero: true
-      }
-    }
   };
 
   // Calculate summary statistics

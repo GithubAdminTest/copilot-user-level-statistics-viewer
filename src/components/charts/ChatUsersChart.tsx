@@ -4,6 +4,7 @@ import React from 'react';
 import { TooltipItem } from 'chart.js';
 import { Line } from 'react-chartjs-2';
 import { registerChartJS } from '../../utils/chartSetup';
+import { createBaseChartOptions, yAxisFormatters } from '../../utils/chartOptions';
 import { DailyChatUsersData } from '../../utils/metricCalculators';
 import ChartContainer from '../ui/ChartContainer';
 
@@ -103,72 +104,30 @@ export default function ChatUsersChart({ data }: ChatUsersChartProps) {
     ],
   };
 
-  const options = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        position: 'top' as const,
-      },
-      title: {
-        display: false,
-      },
-      tooltip: {
-        callbacks: {
-          label: function(context: TooltipItem<'line'>) {
-            const value = context.parsed.y;
-            const datasetLabel = context.dataset.label;
-            
-            return `${datasetLabel}: ${value} users`;
-          },
-          afterBody: function(tooltipItems: TooltipItem<'line'>[]) {
-            if (tooltipItems.length > 0) {
-              const dataIndex = tooltipItems[0].dataIndex;
-              const dayData = data[dataIndex];
-              const totalChatUsers = Math.max(dayData.askModeUsers, dayData.agentModeUsers, dayData.editModeUsers, dayData.inlineModeUsers);
-              return [
-                '',
-                `Date: ${dayData.date}`,
-                `Peak chat users: ${totalChatUsers}`
-              ];
-            }
-            return [];
-          }
-        }
+  const options = createBaseChartOptions({
+    xAxisLabel: 'Date',
+    yAxisLabel: 'Number of Users',
+    yStepSize: 1,
+    yTicksCallback: yAxisFormatters.integer,
+    tooltipLabelCallback: (context: TooltipItem<'line' | 'bar'>) => {
+      const value = context.parsed.y;
+      const datasetLabel = context.dataset.label;
+      return `${datasetLabel}: ${value} users`;
+    },
+    tooltipAfterBodyCallback: (tooltipItems: TooltipItem<'line' | 'bar'>[]) => {
+      if (tooltipItems.length > 0) {
+        const dataIndex = tooltipItems[0].dataIndex;
+        const dayData = data[dataIndex];
+        const totalChatUsers = Math.max(dayData.askModeUsers, dayData.agentModeUsers, dayData.editModeUsers, dayData.inlineModeUsers);
+        return [
+          '',
+          `Date: ${dayData.date}`,
+          `Peak chat users: ${totalChatUsers}`
+        ];
       }
+      return [];
     },
-    scales: {
-      x: {
-        title: {
-          display: true,
-          text: 'Date',
-        },
-        grid: {
-          display: false,
-        },
-      },
-      y: {
-        title: {
-          display: true,
-          text: 'Number of Users',
-        },
-        beginAtZero: true,
-        grid: {
-          color: 'rgba(0, 0, 0, 0.1)',
-        },
-        ticks: {
-          stepSize: 1,
-          callback: function(value: unknown) {
-            return Number(value);
-          }
-        }
-      },
-    },
-    interaction: {
-      intersect: false,
-      mode: 'index' as const,
-    },
-  };
+  });
 
   return (
     <ChartContainer

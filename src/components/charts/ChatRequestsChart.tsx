@@ -4,6 +4,7 @@ import React from 'react';
 import { TooltipItem } from 'chart.js';
 import { Line } from 'react-chartjs-2';
 import { registerChartJS } from '../../utils/chartSetup';
+import { createBaseChartOptions, yAxisFormatters } from '../../utils/chartOptions';
 import { DailyChatRequestsData } from '../../utils/metricCalculators';
 import ChartContainer from '../ui/ChartContainer';
 
@@ -109,72 +110,30 @@ export default function ChatRequestsChart({ data }: ChatRequestsChartProps) {
     ],
   };
 
-  const options = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        position: 'top' as const,
-      },
-      title: {
-        display: false,
-      },
-      tooltip: {
-        callbacks: {
-          label: function(context: TooltipItem<'line'>) {
-            const value = context.parsed.y;
-            const datasetLabel = context.dataset.label;
-            
-            return `${datasetLabel}: ${value} requests`;
-          },
-          afterBody: function(tooltipItems: TooltipItem<'line'>[]) {
-            if (tooltipItems.length > 0) {
-              const dataIndex = tooltipItems[0].dataIndex;
-              const dayData = data[dataIndex];
-              const totalRequests = dayData.askModeRequests + dayData.agentModeRequests + dayData.editModeRequests + dayData.inlineModeRequests;
-              return [
-                '',
-                `Date: ${dayData.date}`,
-                `Total requests: ${totalRequests}`
-              ];
-            }
-            return [];
-          }
-        }
+  const options = createBaseChartOptions({
+    xAxisLabel: 'Date',
+    yAxisLabel: 'Number of Requests',
+    yStepSize: 1,
+    yTicksCallback: yAxisFormatters.integer,
+    tooltipLabelCallback: (context: TooltipItem<'line' | 'bar'>) => {
+      const value = context.parsed.y;
+      const datasetLabel = context.dataset.label;
+      return `${datasetLabel}: ${value} requests`;
+    },
+    tooltipAfterBodyCallback: (tooltipItems: TooltipItem<'line' | 'bar'>[]) => {
+      if (tooltipItems.length > 0) {
+        const dataIndex = tooltipItems[0].dataIndex;
+        const dayData = data[dataIndex];
+        const totalRequests = dayData.askModeRequests + dayData.agentModeRequests + dayData.editModeRequests + dayData.inlineModeRequests;
+        return [
+          '',
+          `Date: ${dayData.date}`,
+          `Total requests: ${totalRequests}`
+        ];
       }
+      return [];
     },
-    scales: {
-      x: {
-        title: {
-          display: true,
-          text: 'Date',
-        },
-        grid: {
-          display: false,
-        },
-      },
-      y: {
-        title: {
-          display: true,
-          text: 'Number of Requests',
-        },
-        beginAtZero: true,
-        grid: {
-          color: 'rgba(0, 0, 0, 0.1)',
-        },
-        ticks: {
-          stepSize: 1,
-          callback: function(value: unknown) {
-            return Number(value);
-          }
-        }
-      },
-    },
-    interaction: {
-      intersect: false,
-      mode: 'index' as const,
-    },
-  };
+  });
 
   return (
     <ChartContainer

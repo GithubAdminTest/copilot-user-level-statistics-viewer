@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { TooltipItem } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
 import { registerChartJS } from '../../utils/chartSetup';
+import { createHorizontalBarChartOptions } from '../../utils/chartOptions';
 import { FeatureAdoptionData } from '../../utils/metricCalculators';
 import ChartContainer from '../ui/ChartContainer';
 import ChartToggleButtons from '../ui/ChartToggleButtons';
@@ -53,19 +54,22 @@ export default function FeatureAdoptionChart({ data }: FeatureAdoptionChartProps
   };
 
   const options = {
-    responsive: true,
-    maintainAspectRatio: false,
-    indexAxis: 'y' as const,
+    ...createHorizontalBarChartOptions({
+      xAxisLabel: viewType === 'absolute' ? 'Number of Users' : 'Percentage (%)',
+      yAxisLabel: 'Features',
+      showLegend: false,
+      yMax: viewType === 'percentage' ? 100 : undefined,
+    }),
     plugins: {
       title: { display: true, text: 'GitHub Copilot Feature Adoption Funnel' },
       legend: { display: false },
       tooltip: {
         callbacks: {
-          title: function(context: TooltipItem<'bar'>[]) {
+          title: (context: TooltipItem<'bar'>[]) => {
             const index = context[0].dataIndex;
             return features[index].name;
           },
-          label: function(context: TooltipItem<'bar'>) {
+          label: (context: TooltipItem<'bar'>) => {
             const index = context.dataIndex;
             const feature = features[index];
             const percentage = totalUsers > 0 ? Math.round((feature.count / totalUsers) * 100 * 100) / 100 : 0;
@@ -78,14 +82,6 @@ export default function FeatureAdoptionChart({ data }: FeatureAdoptionChartProps
         }
       }
     },
-    scales: {
-      x: {
-        beginAtZero: true,
-        title: { display: true, text: viewType === 'absolute' ? 'Number of Users' : 'Percentage (%)' },
-        max: viewType === 'percentage' ? 100 : undefined
-      },
-      y: { title: { display: true, text: 'Features' } }
-    }
   };
 
   return (

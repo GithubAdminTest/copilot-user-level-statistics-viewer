@@ -4,6 +4,7 @@ import React from 'react';
 import { TooltipItem } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
 import { registerChartJS } from '../../utils/chartSetup';
+import { createStackedBarChartOptions, yAxisFormatters } from '../../utils/chartOptions';
 import type { ModeImpactData } from '../../utils/metricCalculators';
 import ChartContainer from '../ui/ChartContainer';
 
@@ -69,77 +70,34 @@ export default function ModeImpactChart({
     ],
   };
 
-  const options = {
-    responsive: true,
-    maintainAspectRatio: false,
-    scales: {
-      x: {
-        stacked: true,
-        title: {
-          display: true,
-          text: 'Date',
-        },
-        grid: {
-          display: false,
-        },
-      },
-      y: {
-        stacked: true,
-        title: {
-          display: true,
-          text: 'Lines of Code',
-        },
-        ticks: {
-          callback: function (value: unknown) {
-            const numeric = typeof value === 'number' ? value : 0;
-            return numeric.toLocaleString();
-          },
-        },
-        grid: {
-          color: 'rgba(0, 0, 0, 0.1)',
-        },
-      },
-    },
-    plugins: {
-      legend: {
-        position: 'top' as const,
-      },
-      title: {
-        display: false,
-      },
-      tooltip: {
-        callbacks: {
-          label: function (context: TooltipItem<'bar'>) {
-            const dataset = context.dataset.label;
-            const value = context.parsed.y;
+  const options = createStackedBarChartOptions({
+    xAxisLabel: 'Date',
+    yAxisLabel: 'Lines of Code',
+    yTicksCallback: yAxisFormatters.localeNumber,
+    tooltipLabelCallback: (context: TooltipItem<'line' | 'bar'>) => {
+      const dataset = context.dataset.label;
+      const value = context.parsed.y;
 
-            if (dataset === 'Lines Added') {
-              return `Lines Added: +${value.toLocaleString()}`;
-            }
-            if (dataset === 'Lines Deleted') {
-              return `Lines Deleted: -${value.toLocaleString()}`;
-            }
-            return '';
-          },
-          afterBody: function (tooltipItems: TooltipItem<'bar'>[]) {
-            if (tooltipItems.length === 0) return [];
-            const index = tooltipItems[0].dataIndex;
-            const entry = data[index];
-            const net = entry.netChange;
-            const netPrefix = net >= 0 ? '+' : '';
-            return [
-              `Net Change: ${netPrefix}${net.toLocaleString()} lines`,
-              `Active Users: ${entry.userCount}`,
-            ];
-          },
-        },
-      },
+      if (dataset === 'Lines Added') {
+        return `Lines Added: +${value.toLocaleString()}`;
+      }
+      if (dataset === 'Lines Deleted') {
+        return `Lines Deleted: -${value.toLocaleString()}`;
+      }
+      return '';
     },
-    interaction: {
-      intersect: false,
-      mode: 'index' as const,
+    tooltipAfterBodyCallback: (tooltipItems: TooltipItem<'line' | 'bar'>[]) => {
+      if (tooltipItems.length === 0) return [];
+      const index = tooltipItems[0].dataIndex;
+      const entry = data[index];
+      const net = entry.netChange;
+      const netPrefix = net >= 0 ? '+' : '';
+      return [
+        `Net Change: ${netPrefix}${net.toLocaleString()} lines`,
+        `Active Users: ${entry.userCount}`,
+      ];
     },
-  };
+  });
 
   return (
     <ChartContainer

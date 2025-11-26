@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { TooltipItem } from 'chart.js';
 import { Bar, Line } from 'react-chartjs-2';
 import { registerChartJS } from '../../utils/chartSetup';
+import { createBaseChartOptions, createDualAxisChartOptions } from '../../utils/chartOptions';
 import { AgentModeHeatmapData } from '../../utils/metricCalculators';
 import ChartContainer from '../ui/ChartContainer';
 import ChartToggleButtons from '../ui/ChartToggleButtons';
@@ -77,44 +78,37 @@ export default function AgentModeHeatmapChart({ data }: AgentModeHeatmapChartPro
     ]
   };
 
-  const options = {
-    responsive: true,
-    maintainAspectRatio: false,
-    interaction: { mode: 'index' as const, intersect: false },
-    scales: chartType === 'heatmap' ? {
-      x: { display: true, title: { display: true, text: 'Date' } },
-      y: { display: true, title: { display: true, text: 'Agent Mode Requests' }, beginAtZero: true }
-    } : {
-      x: { display: true, title: { display: true, text: 'Date' } },
-      y: {
-        type: 'linear' as const,
-        display: true,
-        position: 'left' as const,
-        title: { display: true, text: 'Agent Mode Requests' },
-        beginAtZero: true
-      },
-      y1: {
-        type: 'linear' as const,
-        display: true,
-        position: 'right' as const,
-        title: { display: true, text: 'Unique Users' },
-        beginAtZero: true,
-        grid: { drawOnChartArea: false },
-      }
-    },
+  const tooltipAfterBody = (context: TooltipItem<'bar' | 'line'>[]) => {
+    const dataIndex = context[0].dataIndex;
+    const dayData = data[dataIndex];
+    return ['', `Unique Users: ${dayData.uniqueUsers}`, `Intensity Level: ${dayData.intensity}/5`];
+  };
+
+  const baseHeatmapOptions = createBaseChartOptions({
+    xAxisLabel: 'Date',
+    yAxisLabel: 'Agent Mode Requests',
+    tooltipAfterBodyCallback: tooltipAfterBody,
+  });
+
+  const dualAxisOptions = createDualAxisChartOptions({
+    xAxisLabel: 'Date',
+    yAxisLabel: 'Agent Mode Requests',
+    y1AxisLabel: 'Unique Users',
+    tooltipAfterBodyCallback: tooltipAfterBody,
+  });
+
+  const options = chartType === 'heatmap' ? {
+    ...baseHeatmapOptions,
     plugins: {
+      ...baseHeatmapOptions.plugins,
       title: { display: true, text: 'Agent Mode Usage Intensity' },
-      legend: { position: 'top' as const },
-      tooltip: {
-        callbacks: {
-          afterBody: function(context: TooltipItem<'bar' | 'line'>[]) {
-            const dataIndex = context[0].dataIndex;
-            const dayData = data[dataIndex];
-            return ['', `Unique Users: ${dayData.uniqueUsers}`, `Intensity Level: ${dayData.intensity}/5`];
-          }
-        }
-      }
-    }
+    },
+  } : {
+    ...dualAxisOptions,
+    plugins: {
+      ...dualAxisOptions.plugins,
+      title: { display: true, text: 'Agent Mode Usage Intensity' },
+    },
   };
 
   const renderChart = () => {

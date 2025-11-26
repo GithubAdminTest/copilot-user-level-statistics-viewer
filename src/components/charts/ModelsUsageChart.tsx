@@ -4,6 +4,7 @@ import React, { useMemo } from 'react';
 import { TooltipItem } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
 import { registerChartJS } from '../../utils/chartSetup';
+import { createStackedBarChartOptions } from '../../utils/chartOptions';
 import { CopilotMetrics } from '../../types/metrics';
 import { KNOWN_MODELS } from '../../domain/modelConfig';
 import ChartContainer from '../ui/ChartContainer';
@@ -123,31 +124,19 @@ export default function ModelsUsageChart({ metrics, variant }: ModelsUsageChartP
 
   const chartData = { labels, datasets };
 
-  const options = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: { position: 'top' as const },
-      title: { display: false },
-      tooltip: {
-        callbacks: {
-          label: function(context: TooltipItem<'bar'>) {
-            const value = context.parsed.y || 0;
-            return `${context.dataset.label}: ${value} interactions`;
-          },
-          footer: function(items: TooltipItem<'bar'>[]) {
-            if (!items.length) return '';
-            const dayTotal = items.reduce((sum, it) => sum + (it.parsed.y || 0), 0);
-            return `Total: ${dayTotal}`;
-          }
-        }
-      }
+  const options = createStackedBarChartOptions({
+    xAxisLabel: 'Date',
+    yAxisLabel: 'Interactions',
+    tooltipLabelCallback: (context: TooltipItem<'line' | 'bar'>) => {
+      const value = context.parsed.y || 0;
+      return `${context.dataset.label}: ${value} interactions`;
     },
-    scales: {
-      x: { stacked: true, title: { display: true, text: 'Date' } },
-      y: { stacked: true, beginAtZero: true, title: { display: true, text: 'Interactions' } }
-    }
-  };
+    tooltipFooterCallback: (items: TooltipItem<'line' | 'bar'>[]) => {
+      if (!items.length) return '';
+      const dayTotal = items.reduce((sum, it) => sum + (it.parsed.y || 0), 0);
+      return `Total: ${dayTotal}`;
+    },
+  });
 
   return (
     <ChartContainer

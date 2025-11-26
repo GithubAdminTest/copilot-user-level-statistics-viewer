@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { TooltipItem } from 'chart.js';
 import { Chart } from 'react-chartjs-2';
 import { registerChartJS } from '../../utils/chartSetup';
+import { createBaseChartOptions } from '../../utils/chartOptions';
 import { DailyModelUsageData } from '../../utils/metricCalculators';
 import ChartContainer from '../ui/ChartContainer';
 import ChartToggleButtons from '../ui/ChartToggleButtons';
@@ -63,27 +64,15 @@ export default function PRUModelUsageChart({ data }: PRUModelUsageChartProps) {
     ]
   };
 
-  const options = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: { position: 'top' as const },
-      title: { display: false },
-      tooltip: {
-        callbacks: {
-          label: function(context: TooltipItem<'line' | 'bar'>) {
-            const value = context.parsed.y;
-            const datasetLabel = context.dataset.label;
-            return `${datasetLabel}: ${value} requests`;
-          }
-        }
-      }
+  const options = createBaseChartOptions({
+    xAxisLabel: 'Date',
+    yAxisLabel: 'Number of Requests',
+    tooltipLabelCallback: (context: TooltipItem<'line' | 'bar'>) => {
+      const value = context.parsed.y;
+      const datasetLabel = context.dataset.label;
+      return `${datasetLabel}: ${value} requests`;
     },
-    scales: {
-      x: { title: { display: true, text: 'Date' } },
-      y: { title: { display: true, text: 'Number of Requests' }, beginAtZero: true },
-    },
-  };
+  });
 
   return (
     <ChartContainer

@@ -4,6 +4,7 @@ import React from 'react';
 import { TooltipItem } from 'chart.js';
 import { Line } from 'react-chartjs-2';
 import { registerChartJS } from '../../utils/chartSetup';
+import { createBaseChartOptions, yAxisFormatters } from '../../utils/chartOptions';
 import { DailyEngagementData } from '../../utils/metricCalculators';
 import ChartContainer from '../ui/ChartContainer';
 
@@ -52,62 +53,21 @@ export default function EngagementChart({ data }: EngagementChartProps) {
     ],
   };
 
-  const options = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        position: 'top' as const,
-      },
-      title: {
-        display: false,
-      },
-      tooltip: {
-        callbacks: {
-          label: function(context: TooltipItem<'line'>) {
-            const dataIndex = context.dataIndex;
-            const dayData = data[dataIndex];
-            return [
-              `Engagement: ${dayData.engagementPercentage}%`,
-              `Active Users: ${dayData.activeUsers}`,
-              `Total Users: ${dayData.totalUsers}`,
-            ];
-          }
-        }
-      }
+  const options = createBaseChartOptions({
+    xAxisLabel: 'Date',
+    yAxisLabel: 'Engagement Percentage (%)',
+    yMax: 100,
+    yTicksCallback: yAxisFormatters.percentage,
+    tooltipLabelCallback: (context: TooltipItem<'line' | 'bar'>) => {
+      const dataIndex = context.dataIndex;
+      const dayData = data[dataIndex];
+      return [
+        `Engagement: ${dayData.engagementPercentage}%`,
+        `Active Users: ${dayData.activeUsers}`,
+        `Total Users: ${dayData.totalUsers}`,
+      ];
     },
-    scales: {
-      x: {
-        title: {
-          display: true,
-          text: 'Date',
-        },
-        grid: {
-          display: false,
-        },
-      },
-      y: {
-        title: {
-          display: true,
-          text: 'Engagement Percentage (%)',
-        },
-        beginAtZero: true,
-        max: 100,
-        grid: {
-          color: 'rgba(0, 0, 0, 0.1)',
-        },
-        ticks: {
-          callback: function(value: unknown) {
-            return value + '%';
-          }
-        }
-      },
-    },
-    interaction: {
-      intersect: false,
-      mode: 'index' as const,
-    },
-  };
+  });
 
   return (
     <ChartContainer

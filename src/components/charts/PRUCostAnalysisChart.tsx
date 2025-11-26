@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { TooltipItem } from 'chart.js';
 import { Chart } from 'react-chartjs-2';
 import { registerChartJS } from '../../utils/chartSetup';
+import { createDualAxisChartOptions } from '../../utils/chartOptions';
 import { DailyPRUAnalysisData } from '../../utils/metricCalculators';
 import ChartContainer from '../ui/ChartContainer';
 import ChartToggleButtons from '../ui/ChartToggleButtons';
@@ -149,40 +150,32 @@ export default function PRUCostAnalysisChart({ data }: PRUCostAnalysisChartProps
   const chartData = getChartData();
 
   const options = {
-    responsive: true,
-    maintainAspectRatio: false,
-    interaction: { mode: 'index' as const, intersect: false },
-    scales: {
-      x: { display: true, title: { display: true, text: 'Date' } },
-      y: {
-        type: 'linear' as const,
-        display: true,
-        position: 'left' as const,
-        title: {
-          display: true,
-          text: viewType === 'cost' ? 'Number of Requests' : viewType === 'percentage' ? 'Number of Requests' : 'PRUs'
-        },
-        beginAtZero: true
+    ...createDualAxisChartOptions({
+      xAxisLabel: 'Date',
+      yAxisLabel: viewType === 'cost' ? 'Number of Requests' : viewType === 'percentage' ? 'Number of Requests' : 'PRUs',
+      y1AxisLabel: viewType === 'cost' ? 'Service Value ($)' : viewType === 'percentage' ? 'Percentage (%)' : 'PRUs',
+      y1Max: viewType === 'percentage' ? 100 : undefined,
+      tooltipAfterBodyCallback: (context: TooltipItem<'line' | 'bar'>[]) => {
+        const dataIndex = context[0].dataIndex;
+        const dayData = data[dataIndex];
+        return [
+          '',
+          `PRU Requests: ${dayData.pruRequests}`,
+          `Standard Requests: ${dayData.standardRequests}`,
+          `PRU Percentage: ${dayData.pruPercentage}%`,
+          `Total PRUs: ${dayData.totalPRUs}`,
+          `Service Value: $${dayData.serviceValue}`,
+          `Top Model: ${dayData.topModel}`,
+          `Top Model PRUs: ${dayData.topModelPRUs}`
+        ];
       },
-      y1: {
-        type: 'linear' as const,
-        display: true,
-        position: 'right' as const,
-        title: {
-          display: true,
-          text: viewType === 'cost' ? 'Service Value ($)' : viewType === 'percentage' ? 'Percentage (%)' : 'PRUs'
-        },
-        beginAtZero: true,
-        max: viewType === 'percentage' ? 100 : undefined,
-        grid: { drawOnChartArea: false },
-      }
-    },
+    }),
     plugins: {
       title: { display: true, text: `PRU ${viewType === 'cost' ? 'Service Value' : viewType === 'percentage' ? 'Usage' : 'Model'} Analysis` },
       legend: { position: 'top' as const },
       tooltip: {
         callbacks: {
-          afterBody: function(context: TooltipItem<'bar' | 'line'>[]) {
+          afterBody: (context: TooltipItem<'line' | 'bar'>[]) => {
             const dataIndex = context[0].dataIndex;
             const dayData = data[dataIndex];
             return [
@@ -198,7 +191,7 @@ export default function PRUCostAnalysisChart({ data }: PRUCostAnalysisChartProps
           }
         }
       }
-    }
+    },
   };
 
   return (
