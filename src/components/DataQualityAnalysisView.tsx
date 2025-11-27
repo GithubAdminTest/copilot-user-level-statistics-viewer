@@ -15,7 +15,7 @@ import {
 import { Line } from 'react-chartjs-2';
 import { CopilotMetrics } from '../types/metrics';
 import ExpandableTableSection from './ui/ExpandableTableSection';
-import { ViewPanel } from './ui';
+import { ViewPanel, MetricTileGroup, MetricTileIcon } from './ui';
 import type { VoidCallback } from '../types/events';
 
 ChartJS.register(
@@ -263,32 +263,26 @@ export default function DataQualityAnalysisView({ metrics, onBack }: DataQuality
       }}
       contentClassName="space-y-6"
     >
-      <div className="mb-4">
-        <div className="flex items-center space-x-4">
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
-            <div className="flex items-center">
-              <svg className="w-5 h-5 text-yellow-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.464 0L4.35 16.5c-.77.833.192 2.5 1.732 2.5z" />
-              </svg>
-              <div>
-                <p className="text-sm font-medium text-yellow-800">Users with Data Quality Issues</p>
-                <p className="text-lg font-bold text-yellow-900">{usersWithDataQualityIssues.length.toLocaleString()}</p>
-              </div>
-            </div>
-          </div>
-          <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-            <div className="flex items-center">
-              <svg className="w-5 h-5 text-red-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
-              </svg>
-              <div>
-                <p className="text-sm font-medium text-red-800">Unknown Model Entries</p>
-                <p className="text-lg font-bold text-red-900">{totalUnknownModelEntries.toLocaleString()}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <MetricTileGroup
+        className="mb-4"
+        columns={{ base: 1, md: 2 }}
+        items={[
+          {
+            title: 'Users with Data Quality Issues',
+            value: usersWithDataQualityIssues.length,
+            accent: 'orange',
+            subtitle: 'Agent activity flagged without matching feature metrics',
+            icon: <MetricTileIcon name="warning" />,
+          },
+          {
+            title: 'Unknown Model Entries',
+            value: totalUnknownModelEntries,
+            accent: 'purple',
+            subtitle: 'Daily records attributed to unmapped models',
+            icon: <MetricTileIcon name="records" />,
+          },
+        ]}
+      />
 
       <div className="mb-6">
         <h3 className="text-lg font-semibold text-gray-800 mb-3">Unknown Model Trend</h3>
