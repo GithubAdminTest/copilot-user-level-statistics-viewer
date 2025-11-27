@@ -14,10 +14,9 @@ import PRUModelUsageChart from './charts/PRUModelUsageChart';
 import UserSummaryChart from './charts/UserSummaryChart';
 import UserActivityByLanguageAndFeatureChart from './charts/UserActivityByLanguageAndFeatureChart';
 import UserActivityByModelAndFeatureChart from './charts/UserActivityByModelAndFeatureChart';
-import DashboardStatsCard from './ui/DashboardStatsCard';
 import ActivityCalendar from './ui/ActivityCalendar';
 import DayDetailsModal from './ui/DayDetailsModal';
-import { ViewPanel } from './ui';
+import { DashboardStatsCardGroup, ViewPanel } from './ui';
 import type { VoidCallback } from '../types/events';
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, PointElement, LineElement, Title, Filler);
@@ -507,7 +506,38 @@ export default function UserDetailsView({ userMetrics, userLogin, userId, onBack
       }
     }
   };
-
+  const summaryCards = [
+    {
+      value: totalInteractions,
+      label: 'Total Interactions',
+      accent: 'blue' as const,
+    },
+    {
+      value: totalGeneration,
+      label: 'Code Generation',
+      accent: 'green' as const,
+    },
+    {
+      value: totalAcceptance,
+      label: 'Code Acceptance',
+      accent: 'purple' as const,
+    },
+    {
+      value: totalStandardModelRequests,
+      label: 'Standard Model Requests',
+      accent: 'amber' as const,
+    },
+    {
+      value: totalPremiumModelRequests,
+      label: 'Premium Model Requests',
+      accent: 'rose' as const,
+    },
+    {
+      value: daysActive,
+      label: 'Days Active',
+      accent: 'indigo' as const,
+    },
+  ];
 
 
   return (
@@ -522,38 +552,12 @@ export default function UserDetailsView({ userMetrics, userLogin, userId, onBack
       contentClassName="space-y-8"
     >
       {/* Summary Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4 mb-6">
-        <DashboardStatsCard
-          value={totalInteractions}
-          label="Total Interactions"
-          accent="blue"
-        />
-        <DashboardStatsCard
-          value={totalGeneration}
-          label="Code Generation"
-          accent="green"
-        />
-        <DashboardStatsCard
-          value={totalAcceptance}
-          label="Code Acceptance"
-          accent="purple"
-        />
-        <DashboardStatsCard
-          value={totalStandardModelRequests}
-          label="Standard Model Requests"
-          accent="amber"
-        />
-        <DashboardStatsCard
-          value={totalPremiumModelRequests}
-          label="Premium Model Requests"
-          accent="rose"
-        />
-        <DashboardStatsCard
-          value={daysActive}
-          label="Days Active"
-          accent="indigo"
-        />
-      </div>
+      <DashboardStatsCardGroup
+        className="mb-6"
+        columns={{ base: 2, md: 4, lg: 8 }}
+        gapClassName="gap-4"
+        items={summaryCards}
+      />
 
       <ModeImpactChart
         data={userCombinedImpactData}
