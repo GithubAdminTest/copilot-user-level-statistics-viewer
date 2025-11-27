@@ -3,8 +3,7 @@
 import { UserSummary, CopilotMetrics } from '../types/metrics';
 import { useUsernameTrieSearch } from '../hooks/useUsernameTrieSearch';
 import { useSortableTable } from '../hooks/useSortableTable';
-import DashboardStatsCard from './ui/DashboardStatsCard';
-import { ViewPanel } from './ui';
+import { DashboardStatsCardGroup, ViewPanel } from './ui';
 import type { VoidCallback } from '../types/events';
 
 interface UniqueUsersViewProps {
@@ -66,6 +65,44 @@ export default function UniqueUsersView({ users, rawMetrics, onBack, onUserClick
   const agentUsers = users.filter(user => user.used_agent).length;
   const completionOnlyUsers = users.filter(user => !user.used_chat && !user.used_agent).length;
 
+  const summaryCards = [
+    {
+      value: users.length,
+      label: 'Total Users',
+      accent: 'blue' as const,
+    },
+    {
+      value: totalInteractions,
+      label: 'Total Interactions',
+      accent: 'green' as const,
+    },
+    {
+      value: totalGeneration,
+      label: 'Code Generation',
+      accent: 'purple' as const,
+    },
+    {
+      value: totalAcceptance,
+      label: 'Code Acceptance',
+      accent: 'orange' as const,
+    },
+    {
+      value: chatUsers,
+      label: 'Chat Users',
+      accent: 'teal' as const,
+    },
+    {
+      value: agentUsers,
+      label: 'Agent Users',
+      accent: 'indigo' as const,
+    },
+    {
+      value: completionOnlyUsers,
+      label: 'Completion Only Users',
+      accent: 'amber' as const,
+    },
+  ];
+
   return (
     <ViewPanel
       headerProps={{
@@ -75,43 +112,12 @@ export default function UniqueUsersView({ users, rawMetrics, onBack, onUserClick
       contentClassName="space-y-6"
     >
       {/* Summary Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-4 mb-6">
-        <DashboardStatsCard
-          value={users.length}
-          label="Total Users"
-          accent="blue"
-        />
-        <DashboardStatsCard
-          value={totalInteractions}
-          label="Total Interactions"
-          accent="green"
-        />
-        <DashboardStatsCard
-          value={totalGeneration}
-          label="Code Generation"
-          accent="purple"
-        />
-        <DashboardStatsCard
-          value={totalAcceptance}
-          label="Code Acceptance"
-          accent="orange"
-        />
-        <DashboardStatsCard
-          value={chatUsers}
-          label="Chat Users"
-          accent="teal"
-        />
-        <DashboardStatsCard
-          value={agentUsers}
-          label="Agent Users"
-          accent="indigo"
-        />
-        <DashboardStatsCard
-          value={completionOnlyUsers}
-          label="Completion Only Users"
-          accent="amber"
-        />
-      </div>
+      <DashboardStatsCardGroup
+        className="mb-6"
+        columns={{ base: 2, md: 3, lg: 7 }}
+        gapClassName="gap-4"
+        items={summaryCards}
+      />
 
       {/* Users Table */}
       <div className="mt-6 pt-6 border-t border-gray-200">

@@ -3,8 +3,7 @@
 import { LanguageStats } from '../domain/calculators/metricCalculators';
 import { useState } from 'react';
 import ExpandableTableSection from './ui/ExpandableTableSection';
-import DashboardStatsCard from './ui/DashboardStatsCard';
-import { ViewPanel } from './ui';
+import { DashboardStatsCardGroup, ViewPanel } from './ui';
 import type { VoidCallback } from '../types/events';
 
 interface LanguagesViewProps {
@@ -75,6 +74,51 @@ export default function LanguagesView({ languages, onBack }: LanguagesViewProps)
 
   const totalNetLocImpact = totalLocAdded - totalLocDeleted;
 
+  const netLocImpactAccent: 'green' | 'rose' = totalNetLocImpact >= 0 ? 'green' : 'rose';
+
+  const summaryCards = [
+    {
+      value: totalLanguages,
+      label: 'Total Languages',
+      accent: 'blue' as const,
+    },
+    {
+      value: totalEngagements,
+      label: 'Total Engagements',
+      accent: 'purple' as const,
+    },
+    {
+      value: totalGenerations,
+      label: 'Code Generations',
+      accent: 'green' as const,
+    },
+    {
+      value: totalAcceptances,
+      label: 'Code Acceptances',
+      accent: 'orange' as const,
+    },
+    {
+      value: totalUsers,
+      label: 'Max Users/Lang',
+      accent: 'teal' as const,
+    },
+    {
+      value: totalLocAdded,
+      label: 'LOC Added',
+      accent: 'orange' as const,
+    },
+    {
+      value: totalLocDeleted,
+      label: 'LOC Deleted',
+      accent: 'rose' as const,
+    },
+    {
+      value: totalNetLocImpact,
+      label: 'Net LOC Impact',
+      accent: netLocImpactAccent,
+    },
+  ];
+
   // Create sorted lists for the two tables
   const languagesByGenerations = [...languages].sort((a, b) => b.totalGenerations - a.totalGenerations);
   const languagesByUsers = [...languages].sort((a, b) => b.uniqueUsers - a.uniqueUsers);
@@ -93,48 +137,12 @@ export default function LanguagesView({ languages, onBack }: LanguagesViewProps)
       contentClassName="space-y-6"
     >
       {/* Summary Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-9 gap-4 mb-6">
-        <DashboardStatsCard
-          value={totalLanguages}
-          label="Total Languages"
-          accent="blue"
-        />
-        <DashboardStatsCard
-          value={totalEngagements}
-          label="Total Engagements"
-          accent="purple"
-        />
-        <DashboardStatsCard
-          value={totalGenerations}
-          label="Code Generations"
-          accent="green"
-        />
-        <DashboardStatsCard
-          value={totalAcceptances}
-          label="Code Acceptances"
-          accent="orange"
-        />
-        <DashboardStatsCard
-          value={totalUsers}
-          label="Max Users/Lang"
-          accent="teal"
-        />
-        <DashboardStatsCard
-          value={totalLocAdded}
-          label="LOC Added"
-          accent="orange"
-        />
-        <DashboardStatsCard
-          value={totalLocDeleted}
-          label="LOC Deleted"
-          accent="rose"
-        />
-          <DashboardStatsCard
-            value={totalNetLocImpact}
-            label="Net LOC Impact"
-            accent={totalNetLocImpact >= 0 ? 'green' : 'rose'}
-          />
-      </div>
+      <DashboardStatsCardGroup
+        className="mb-6"
+        columns={{ base: 2, md: 4, lg: 9 }}
+        gapClassName="gap-4"
+        items={summaryCards}
+      />
 
       {/* Two Column Layout for Tables */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mt-6 pt-6 border-t border-gray-200">
