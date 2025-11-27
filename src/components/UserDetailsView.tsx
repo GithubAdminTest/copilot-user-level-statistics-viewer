@@ -625,29 +625,21 @@ export default function UserDetailsView({ userMetrics, userLogin, userId, onBack
         </div>
       </div>
 
-      <div className="mt-8 pt-6 border-t border-gray-200">
-        <UserActivityByLanguageAndFeatureChart
+      <UserActivityByLanguageAndFeatureChart
         languageFeatureAggregates={languageFeatureAggregates}
         languageBarChartData={languageBarChartData}
         languageBarChartOptions={languageBarChartOptions}
         />
-      </div>
 
-      <div className="mt-8 pt-6 border-t border-gray-200">
-        <PRUCostAnalysisChart data={userPRUAnalysisData} />
-      </div>
+      <PRUCostAnalysisChart data={userPRUAnalysisData} />
 
-      <div className="mt-8 pt-6 border-t border-gray-200">
-        <PRUModelUsageChart data={userModelUsageData} />
-      </div>
+      <PRUModelUsageChart data={userModelUsageData} />
 
-      <div className="mt-8 pt-6 border-t border-gray-200">
-        <UserActivityByModelAndFeatureChart
-          modelFeatureAggregates={modelFeatureAggregates}
-          modelBarChartData={modelBarChartData}
-          modelBarChartOptions={modelBarChartOptions}
-        />
-      </div>
+      <UserActivityByModelAndFeatureChart
+        modelFeatureAggregates={modelFeatureAggregates}
+        modelBarChartData={modelBarChartData}
+        modelBarChartOptions={modelBarChartOptions}
+      />
 
       <DayDetailsModal
         isOpen={modalState.isOpen}
