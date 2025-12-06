@@ -27,11 +27,9 @@ export default function CopilotAdoptionView({ featureAdoptionData, agentModeHeat
   const [expandedUsernames, setExpandedUsernames] = useState<Set<string>>(new Set());
   const [expandedVsUsernames, setExpandedVsUsernames] = useState<Set<string>>(new Set());
 
-  // Plugin version analysis
   const pluginVersionAnalysis = React.useMemo(() => {
     const versionMap = new Map<string, Set<string>>();
-    
-    // Extract plugin versions for IntelliJ users (exclude nightly builds)
+
     for (const metric of metrics) {
       for (const ideTotal of metric.totals_by_ide) {
         if (ideTotal.ide === 'intellij' && ideTotal.last_known_plugin_version?.plugin_version) {
@@ -46,7 +44,6 @@ export default function CopilotAdoptionView({ featureAdoptionData, agentModeHeat
       }
     }
 
-    // Convert to array and sort by user count
     return Array.from(versionMap.entries())
       .map(([version, usernamesSet]) => ({
         version,
@@ -65,7 +62,6 @@ export default function CopilotAdoptionView({ featureAdoptionData, agentModeHeat
     return userSet.size;
   }, [pluginVersionAnalysis]);
 
-  // VS Code plugin version analysis
   const vscodeVersionAnalysis = React.useMemo(() => {
     const versionMap = new Map<string, Set<string>>();
 
@@ -105,7 +101,6 @@ export default function CopilotAdoptionView({ featureAdoptionData, agentModeHeat
     return userSet.size;
   }, [vscodeVersionAnalysis]);
 
-  // Get latest 8 stable (non-nightly) versions from JetBrains data
   const latestEightUpdates = React.useMemo(() => {
     const stable = jetbrainsUpdates.filter(u => !u.version.toLowerCase().endsWith('-nightly'));
     return stable.slice(0, 8);
@@ -113,13 +108,11 @@ export default function CopilotAdoptionView({ featureAdoptionData, agentModeHeat
 
   const latestEightVersions = React.useMemo(() => latestEightUpdates.map(u => u.version), [latestEightUpdates]);
 
-  // VS Code latest versions window from rolling history
   const latestVsCodeVersions = React.useMemo(
     () => vscodeVersions.map(v => v.version),
     [vscodeVersions],
   );
 
-  // Map of version -> release date (cdate) for quick lookup (stable only)
   const jetbrainsVersionDateMap = React.useMemo(() => {
     const map = new Map<string, string>();
     for (const u of jetbrainsUpdates) {
@@ -132,7 +125,6 @@ export default function CopilotAdoptionView({ featureAdoptionData, agentModeHeat
     return map;
   }, [jetbrainsUpdates]);
 
-  // Identify outdated plugins
   const outdatedPlugins = React.useMemo(() => {
     return pluginVersionAnalysis.filter(plugin => 
       !latestEightVersions.includes(plugin.version)

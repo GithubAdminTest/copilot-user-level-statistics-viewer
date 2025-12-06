@@ -1,6 +1,5 @@
 'use client';
 
-import React from 'react';
 import { CopilotMetrics } from '../../types/metrics';
 
 interface ActivityCalendarProps {
@@ -9,17 +8,14 @@ interface ActivityCalendarProps {
 }
 
 export default function ActivityCalendar({ userMetrics, onDayClick }: ActivityCalendarProps) {
-  // Get date range from the metrics
   const startDate = new Date(userMetrics[0]?.report_start_day || userMetrics[0]?.day || new Date());
   const endDate = new Date(userMetrics[0]?.report_end_day || userMetrics[userMetrics.length - 1]?.day || new Date());
-  
-  // Create a map of dates to metrics for quick lookup
+
   const metricsMap = new Map<string, CopilotMetrics>();
   userMetrics.forEach(metric => {
     metricsMap.set(metric.day, metric);
   });
 
-  // Generate all dates in the range
   const generateDateGrid = () => {
     const dates: Date[] = [];
     const current = new Date(startDate);
@@ -33,8 +29,6 @@ export default function ActivityCalendar({ userMetrics, onDayClick }: ActivityCa
   };
 
   const allDates = generateDateGrid();
-  
-  // Group dates by weeks for grid layout
   const groupDatesByWeek = (dates: Date[]) => {
     const weeks: Date[][] = [];
     let currentWeek: Date[] = [];

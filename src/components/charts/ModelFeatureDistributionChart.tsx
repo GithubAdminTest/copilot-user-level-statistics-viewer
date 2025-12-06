@@ -44,15 +44,11 @@ export default function ModelFeatureDistributionChart({ data }: ModelFeatureDist
       </ChartContainer>
     );
   }
-
-  // Filter data based on selection
   const filteredData = selectedModel === 'all' ? data : data.filter(d => d.model === selectedModel);
-  
-  // Apply progressive disclosure pattern
+
   const maxItemsToShow = 5;
   const displayData = isExpanded ? filteredData : filteredData.slice(0, maxItemsToShow);
 
-  // Feature colors using centralized palette
   const featureColorMap = {
     agentMode: baseFeatureColors.agentMode.solid,
     askMode: baseFeatureColors.askMode.solid,
@@ -75,7 +71,6 @@ export default function ModelFeatureDistributionChart({ data }: ModelFeatureDist
 
   const getChartData = () => {
     if (viewType === 'pie' && selectedModel !== 'all') {
-      // Pie chart for single model
       const modelData = data.find(d => d.model === selectedModel);
       if (!modelData) return { labels: [], datasets: [] };
 
@@ -92,7 +87,6 @@ export default function ModelFeatureDistributionChart({ data }: ModelFeatureDist
       };
     }
 
-    // Bar charts
     const features = Object.keys(featureLabels) as (keyof typeof featureLabels)[];
     
     if (viewType === 'stacked') {
@@ -107,7 +101,6 @@ export default function ModelFeatureDistributionChart({ data }: ModelFeatureDist
         }))
       };
     } else {
-      // grouped
       return {
         labels: features.map(f => featureLabels[f]),
         datasets: displayData.map((model, index) => ({
@@ -183,7 +176,6 @@ export default function ModelFeatureDistributionChart({ data }: ModelFeatureDist
     },
   };
 
-  // Calculate summary statistics
   const totalInteractions = calculateTotal(filteredData, d => d.totalInteractions);
   const totalPRUs = calculateTotal(filteredData, d => d.totalPRUs);
   const totalServiceValue = calculateTotal(filteredData, d => d.serviceValue);
@@ -244,7 +236,6 @@ export default function ModelFeatureDistributionChart({ data }: ModelFeatureDist
 
   const footer = (
     <>
-      {/* Progressive Disclosure Button */}
       {selectedModel === 'all' && filteredData.length > maxItemsToShow && (
         <div className="mt-4 text-center">
           <button

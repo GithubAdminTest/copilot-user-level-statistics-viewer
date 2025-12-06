@@ -29,7 +29,6 @@ interface UserDetailsViewProps {
 }
 
 export default function UserDetailsView({ userMetrics, userLogin, userId, onBack }: UserDetailsViewProps) {
-  // State for day details modal
   const [modalState, setModalState] = useState<{
     isOpen: boolean;
     selectedDate: string;
@@ -56,7 +55,6 @@ export default function UserDetailsView({ userMetrics, userLogin, userId, onBack
     });
   };
 
-  // Memoized aggregated stats for this user
   const { totalInteractions, totalGeneration, totalAcceptance, totalStandardModelRequests, totalPremiumModelRequests, daysActive, usedAgent, usedChat } = useMemo(() => {
     let interactions = 0;
     let generation = 0;
@@ -98,7 +96,6 @@ export default function UserDetailsView({ userMetrics, userLogin, userId, onBack
     };
   }, [userMetrics]);
 
-  // Memoized unique plugin versions ordered by date descending
   const uniquePluginVersions = useMemo(() => {
     return userMetrics
       .flatMap(metric => metric.totals_by_ide)
@@ -122,7 +119,6 @@ export default function UserDetailsView({ userMetrics, userLogin, userId, onBack
       .sort((a, b) => new Date(b.sampled_at).getTime() - new Date(a.sampled_at).getTime());
   }, [userMetrics]);
 
-  // Memoized aggregate totals by feature
   const featureAggregates = useMemo(() => {
     return userMetrics
       .flatMap(metric => metric.totals_by_feature)
@@ -143,7 +139,6 @@ export default function UserDetailsView({ userMetrics, userLogin, userId, onBack
       }, [] as typeof userMetrics[0]['totals_by_feature']);
   }, [userMetrics]);
 
-  // Memoized aggregate totals by IDE
   const ideAggregates = useMemo(() => {
     return userMetrics
       .flatMap(metric => metric.totals_by_ide)
@@ -164,7 +159,6 @@ export default function UserDetailsView({ userMetrics, userLogin, userId, onBack
       }, [] as typeof userMetrics[0]['totals_by_ide']);
   }, [userMetrics]);
 
-  // Memoized aggregate totals by language and feature
   const languageFeatureAggregates = useMemo(() => {
     return userMetrics
       .flatMap(metric => metric.totals_by_language_feature)
@@ -185,7 +179,6 @@ export default function UserDetailsView({ userMetrics, userLogin, userId, onBack
       }, [] as typeof userMetrics[0]['totals_by_language_feature']);
   }, [userMetrics]);
 
-  // Memoized aggregate totals by model and feature
   const modelFeatureAggregates = useMemo(() => {
     return userMetrics
       .flatMap(metric => metric.totals_by_model_feature)
@@ -207,13 +200,9 @@ export default function UserDetailsView({ userMetrics, userLogin, userId, onBack
       }, [] as typeof userMetrics[0]['totals_by_model_feature']);
   }, [userMetrics]);
 
-  // Memoized PRU analysis and impact data using domain calculators
   const userPRUAnalysisData = useMemo(() => calculateDailyPRUAnalysis(userMetrics), [userMetrics]);
   const userCombinedImpactData = useMemo(() => calculateJoinedImpactData(userMetrics), [userMetrics]);
   const userModelUsageData = useMemo(() => calculateDailyModelUsage(userMetrics), [userMetrics]);
-
-  // Memoized chart data
-  // 1. IDEs chart data (based on interactions)
   const ideChartData = useMemo(() => ({
     labels: ideAggregates.map(ide => formatIDEName(ide.ide)),
     datasets: [{
@@ -226,7 +215,6 @@ export default function UserDetailsView({ userMetrics, userLogin, userId, onBack
     }]
   }), [ideAggregates]);
 
-  // 2. Programming Languages chart data (based on generations)
   const { languageGenerations, languageChartData } = useMemo(() => {
     const generations = languageFeatureAggregates.reduce((acc, item) => {
       if (item.language && item.language !== '' && item.language !== 'unknown') {
@@ -251,7 +239,6 @@ export default function UserDetailsView({ userMetrics, userLogin, userId, onBack
     };
   }, [languageFeatureAggregates]);
 
-  // 3. Models chart data (based on interactions regardless of feature)
   const { modelInteractions, modelChartData } = useMemo(() => {
     const interactions = modelFeatureAggregates.reduce((acc, item) => {
       if (item.model && item.model !== '') {
@@ -300,8 +287,6 @@ export default function UserDetailsView({ userMetrics, userLogin, userId, onBack
       }
     }
   };
-
-  // Memoized bar chart data for language activity by day
   const languageBarChartData = useMemo(() => {
     const allLanguages = Array.from(
       new Set(userMetrics.flatMap(metric => metric.totals_by_language_feature.map(item => item.language)))
@@ -380,8 +365,6 @@ export default function UserDetailsView({ userMetrics, userLogin, userId, onBack
       datasets: datasets,
     };
   }, [userMetrics]);
-
-  // Memoized bar chart data for model activity by day
   const modelBarChartData = useMemo(() => {
     const allModels = Array.from(
       new Set(userMetrics.flatMap(metric => metric.totals_by_model_feature.map(item => item.model)))

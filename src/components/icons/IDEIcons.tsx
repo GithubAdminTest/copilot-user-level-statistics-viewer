@@ -1,6 +1,5 @@
 import React from 'react';
 
-// IDE Icon Components using SVGs
 const VSCodeIcon = () => (
   <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M23.15 2.587L18.21.21a1.494 1.494 0 0 0-1.705.29l-9.46 8.63-4.12-3.128a.999.999 0 0 0-1.276.057L.327 7.261A1 1 0 0 0 .326 8.74L3.899 12 .326 15.26a1 1 0 0 0 .001 1.479L1.65 17.94a.999.999 0 0 0 1.276.057l4.12-3.128 9.46 8.63a1.492 1.492 0 0 0 1.704.29l4.942-2.377A1.5 1.5 0 0 0 24 20.06V3.939a1.5 1.5 0 0 0-.85-1.352z" fill="#007ACC"/>
@@ -51,7 +50,6 @@ const XcodeIcon = () => (
   </svg>
 );
 
-// Default IDE icon for unknown IDEs
 const DefaultIDEIcon = () => (
   <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M3 3h18a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z" stroke="#6B7280" strokeWidth="2" fill="none"/>
@@ -59,7 +57,6 @@ const DefaultIDEIcon = () => (
   </svg>
 );
 
-// Map IDE names to their respective icon components
 const ideIconMap: Record<string, React.ComponentType> = {
   vscode: VSCodeIcon,
   intellij: IntelliJIcon,
@@ -70,13 +67,11 @@ const ideIconMap: Record<string, React.ComponentType> = {
   xcode: XcodeIcon,
 };
 
-// Function to get the appropriate IDE icon
 export const getIDEIcon = (ideName: string): React.ComponentType => {
   const normalizedName = ideName.toLowerCase().trim();
   return ideIconMap[normalizedName] || DefaultIDEIcon;
 };
 
-// Function to get a formatted IDE name for display
 export const formatIDEName = (ideName: string): string => {
   const formatMap: Record<string, string> = {
     vscode: 'VS Code',
