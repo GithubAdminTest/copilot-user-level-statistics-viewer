@@ -139,7 +139,6 @@ export default function UniqueUsersView({ users, rawMetrics, onBack, onUserClick
       ),
     },
   ];
-  // Calculate summary statistics
   const totalInteractions = users.reduce((sum, user) => sum + user.total_user_initiated_interactions, 0);
   const totalGeneration = users.reduce((sum, user) => sum + user.total_code_generation_activities, 0);
   const totalAcceptance = users.reduce((sum, user) => sum + user.total_code_acceptance_activities, 0);

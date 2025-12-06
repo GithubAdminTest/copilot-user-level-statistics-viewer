@@ -1,4 +1,3 @@
-// Stats Calculator
 export {
   type UserUsageStats,
   type StatsAccumulator,
@@ -11,7 +10,6 @@ export {
   calculateStatsFromMetrics,
 } from './statsCalculator';
 
-// Engagement Calculator
 export {
   type DailyEngagementData,
   type EngagementAccumulator,
@@ -20,7 +18,6 @@ export {
   computeEngagementData,
 } from './engagementCalculator';
 
-// Chat Calculator
 export {
   type DailyChatUsersData,
   type DailyChatRequestsData,
@@ -32,7 +29,6 @@ export {
   computeChatRequestsData,
 } from './chatCalculator';
 
-// Language Calculator
 export {
   type LanguageStats,
   type LanguageAccumulator,
@@ -42,7 +38,6 @@ export {
   shouldFilterLanguage,
 } from './languageCalculator';
 
-// Model Usage Calculator
 export {
   type DailyModelUsageData,
   type DailyPRUAnalysisData,
@@ -60,7 +55,6 @@ export {
   calculateDailyModelUsageFromMetrics,
 } from './modelUsageCalculator';
 
-// Feature Adoption Calculator
 export {
   type FeatureAdoptionData,
   type FeatureAdoptionAccumulator,
@@ -69,7 +63,6 @@ export {
   computeFeatureAdoptionData,
 } from './featureAdoptionCalculator';
 
-// Impact Calculator
 export {
   type ImpactData,
   type AgentImpactData,

@@ -78,7 +78,6 @@ export default function LanguagesView({ languages, onBack }: LanguagesViewProps)
     setTableSortState({ field, direction: next.direction });
   };
 
-  // Calculate summary statistics
   const totalLanguages = languages.length;
   const totalGenerations = languages.reduce((sum, lang) => sum + lang.totalGenerations, 0);
   const totalAcceptances = languages.reduce((sum, lang) => sum + lang.totalAcceptances, 0);
@@ -134,7 +133,6 @@ export default function LanguagesView({ languages, onBack }: LanguagesViewProps)
     },
   ];
 
-  // Create sorted lists for the two tables
   const languagesByGenerations = useMemo(
     () => [...languages].sort((a, b) => b.totalGenerations - a.totalGenerations),
     [languages],
@@ -400,8 +398,6 @@ export default function LanguagesView({ languages, onBack }: LanguagesViewProps)
       ),
     },
   ];
-
-  // Determine how many items to show
   const maxItemsToShow = 10;
   return (
     <ViewPanel

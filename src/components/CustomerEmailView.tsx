@@ -35,7 +35,6 @@ export default function CustomerEmailView({
   const [isCopilotStandalone, setIsCopilotStandalone] = useState(false);
   const [copyStatus, setCopyStatus] = useState<'idle' | 'copying' | 'success' | 'error'>('idle');
 
-// Escapes user text for safe HTML output
 function escapeHtml(text: string) {
   return text
     .replace(/&/g, '&amp;')
@@ -44,7 +43,6 @@ function escapeHtml(text: string) {
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
 }
-  // Refs for chart containers
   const combinedImpactChartRef = useRef<HTMLDivElement>(null);
   const agentModeChartRef = useRef<HTMLDivElement>(null);
   const codeCompletionChartRef = useRef<HTMLDivElement>(null);
@@ -52,9 +50,7 @@ function escapeHtml(text: string) {
   const featureAdoptionChartRef = useRef<HTMLDivElement>(null);
   const premiumModelsChartRef = useRef<HTMLDivElement>(null);
 
-  // Calculate top model, skipping "unknown" if needed
   const { displayModelName, isTopModelPremium } = useMemo(() => {
-    // Collect all model engagements from metrics
     const modelEngagements = new Map<string, number>();
     
     for (const metric of metrics) {
@@ -68,11 +64,9 @@ function escapeHtml(text: string) {
       }
     }
 
-    // Sort models by engagement
     const sortedModels = Array.from(modelEngagements.entries())
       .sort((a, b) => b[1] - a[1]);
 
-    // Find first model that's not "unknown"
     let selectedModel = sortedModels[0];
     if (selectedModel && selectedModel[0].toLowerCase() === 'unknown' && sortedModels.length > 1) {
       selectedModel = sortedModels[1];
@@ -87,12 +81,10 @@ function escapeHtml(text: string) {
     };
   }, [metrics]);
 
-  // Calculate total lines added for Agent Mode vs Code Completion
   const totalAgentLinesAdded = agentImpactData.reduce((sum, entry) => sum + entry.locAdded, 0);
   const totalCodeCompletionLinesAdded = codeCompletionImpactData.reduce((sum, entry) => sum + entry.locAdded, 0);
   const isAgentModeHealthy = totalAgentLinesAdded > totalCodeCompletionLinesAdded;
 
-  // Calculate Agent Mode adoption percentage
   const agentModeAdoptionPercentage = useMemo(() => {
     if (!featureAdoptionData || featureAdoptionData.totalUsers === 0) {
       return 0;
@@ -100,7 +92,6 @@ function escapeHtml(text: string) {
     return Math.round((featureAdoptionData.agentModeUsers / featureAdoptionData.totalUsers) * 100);
   }, [featureAdoptionData]);
 
-  // Function to capture chart as base64 image
   const captureChartAsImage = (chartRef: React.RefObject<HTMLDivElement | null>): string | null => {
     if (!chartRef.current) return null;
     
@@ -115,12 +106,10 @@ function escapeHtml(text: string) {
     }
   };
 
-  // Function to copy email with embedded images
   const copyEmailWithImages = async () => {
     setCopyStatus('copying');
     
     try {
-      // Capture all charts as images
       const combinedImpactImage = captureChartAsImage(combinedImpactChartRef);
       const agentModeImage = captureChartAsImage(agentModeChartRef);
       const codeCompletionImage = captureChartAsImage(codeCompletionChartRef);
@@ -128,7 +117,6 @@ function escapeHtml(text: string) {
       const featureAdoptionImage = captureChartAsImage(featureAdoptionChartRef);
       const premiumModelsImage = captureChartAsImage(premiumModelsChartRef);
 
-      // Build HTML email content
       const htmlContent = `
 <!DOCTYPE html>
 <html>
@@ -236,10 +224,7 @@ ${premiumModelsImage ? `
 </body>
 </html>
       `.trim();
-
-      // Copy to clipboard with HTML format
       const htmlBlob = new Blob([htmlContent], { type: 'text/html' });
-      // Use DOMParser or a temporary DOM element to safely extract plain text
       const tempDiv = document.createElement('div');
       tempDiv.innerHTML = htmlContent;
       const plainText = tempDiv.textContent || tempDiv.innerText || "";
