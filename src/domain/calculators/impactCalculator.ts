@@ -101,7 +101,6 @@ export function accumulateFeatureImpacts(
   for (const { feature, locAdded, locDeleted } of features) {
     const hasLoc = locAdded > 0 || locDeleted > 0;
 
-    // Agent Impact (agent_edit or chat_panel_agent_mode)
     if (feature === 'agent_edit' || feature === 'chat_panel_agent_mode') {
       if (hasLoc) {
         agentLocAdded += locAdded;
@@ -110,7 +109,6 @@ export function accumulateFeatureImpacts(
       }
     }
 
-    // Code Completion Impact
     if (feature === 'code_completion' && hasLoc) {
       accumulateToMap(
         accumulator.dailyCodeCompletionImpact,
@@ -121,7 +119,6 @@ export function accumulateFeatureImpacts(
       );
     }
 
-    // Edit Mode Impact
     if (feature === 'chat_panel_edit_mode' && hasLoc) {
       accumulateToMap(
         accumulator.dailyEditModeImpact,
@@ -132,7 +129,6 @@ export function accumulateFeatureImpacts(
       );
     }
 
-    // Inline Mode Impact
     if (feature === 'chat_inline' && hasLoc) {
       accumulateToMap(
         accumulator.dailyInlineModeImpact,
@@ -143,7 +139,6 @@ export function accumulateFeatureImpacts(
       );
     }
 
-    // Ask Mode Impact
     if (feature === 'chat_panel_ask_mode' && hasLoc) {
       accumulateToMap(
         accumulator.dailyAskModeImpact,
@@ -154,7 +149,6 @@ export function accumulateFeatureImpacts(
       );
     }
 
-    // Joined Impact
     if (JOINED_FEATURES.includes(feature) && hasLoc) {
       joinedLocAdded += locAdded;
       joinedLocDeleted += locDeleted;

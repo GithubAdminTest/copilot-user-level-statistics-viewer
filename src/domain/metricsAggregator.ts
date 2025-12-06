@@ -2,32 +2,31 @@ import { CopilotMetrics, MetricsStats, UserSummary } from '../types/metrics';
 import { DateRangeFilter } from '../types/filters';
 import { getFilteredDateRange } from '../utils/dateFilters';
 import {
-  // Stats
   createStatsAccumulator,
   accumulateUserUsage,
   accumulateIdeUser,
   accumulateLanguageEngagement,
   accumulateModelEngagement,
   computeStats,
-  // Engagement
+
   DailyEngagementData,
   createEngagementAccumulator,
   accumulateEngagement,
   computeEngagementData,
-  // Chat
+
   DailyChatUsersData,
   DailyChatRequestsData,
   createChatAccumulator,
   accumulateChatFeature,
   computeChatUsersData,
   computeChatRequestsData,
-  // Language
+
   LanguageStats,
   createLanguageAccumulator,
   accumulateLanguageStats,
   computeLanguageStats,
   shouldFilterLanguage,
-  // Model Usage
+
   DailyModelUsageData,
   DailyPRUAnalysisData,
   AgentModeHeatmapData,
@@ -39,12 +38,12 @@ import {
   computePRUAnalysisData,
   computeAgentModeHeatmapData,
   computeModelFeatureDistributionData,
-  // Feature Adoption
+
   FeatureAdoptionData,
   createFeatureAdoptionAccumulator,
   accumulateFeatureAdoption,
   computeFeatureAdoptionData,
-  // Impact
+
   AgentImpactData,
   CodeCompletionImpactData,
   ModeImpactData,
@@ -148,7 +147,6 @@ export function aggregateMetrics(
 ): AggregatedMetrics {
   let filteredMetricsCount = 0;
 
-  // Date Filter Setup
   let startDate: Date | null = null;
   let endDate: Date | null = null;
   if (options.dateFilter && options.dateFilter !== 'all' && options.reportEndDay) {
@@ -157,7 +155,6 @@ export function aggregateMetrics(
     endDate = new Date(endDay);
   }
 
-  // Initialize all accumulators
   const statsAccumulator = createStatsAccumulator();
   const userSummaryAccumulator = createUserSummaryAccumulator();
   const engagementAccumulator = createEngagementAccumulator();
@@ -167,9 +164,7 @@ export function aggregateMetrics(
   const featureAdoptionAccumulator = createFeatureAdoptionAccumulator();
   const impactAccumulator = createImpactAccumulator();
 
-  // Single pass through all metrics
   for (const metric of metrics) {
-    // Date Filtering
     if (startDate && endDate) {
       const metricDate = new Date(metric.day);
       if (metricDate < startDate || metricDate > endDate) continue;
@@ -177,7 +172,6 @@ export function aggregateMetrics(
 
     filteredMetricsCount++;
 
-    // Capture report dates from first filtered metric
     if (filteredMetricsCount === 1) {
       statsAccumulator.reportStartDay = metric.report_start_day;
       statsAccumulator.reportEndDay = metric.report_end_day;
@@ -186,24 +180,18 @@ export function aggregateMetrics(
     const date = metric.day;
     const userId = metric.user_id;
 
-    // User Summary
     accumulateUserSummary(userSummaryAccumulator, metric);
 
-    // Stats: User Usage
     accumulateUserUsage(statsAccumulator, userId, metric.used_chat, metric.used_agent);
 
-    // Engagement
     accumulateEngagement(engagementAccumulator, date, userId);
 
-    // Impact: Initialize dates
     ensureImpactDates(impactAccumulator, date);
 
-    // Process totals_by_ide
     for (const ideTotal of metric.totals_by_ide) {
       accumulateIdeUser(statsAccumulator, ideTotal.ide, userId);
     }
 
-    // Process totals_by_language_feature
     for (const langFeature of metric.totals_by_language_feature) {
       if (shouldFilterLanguage(langFeature.language, options.removeUnknownLanguages ?? false)) {
         continue;
@@ -225,7 +213,6 @@ export function aggregateMetrics(
       );
     }
 
-    // Process totals_by_model_feature
     for (const modelFeature of metric.totals_by_model_feature) {
       const engagements = modelFeature.code_generation_activity_count + modelFeature.code_acceptance_activity_count;
       accumulateModelEngagement(statsAccumulator, modelFeature.model, engagements);
@@ -240,11 +227,9 @@ export function aggregateMetrics(
       );
     }
 
-    // Process totals_by_feature
     const featureImpacts: Array<{ feature: string; locAdded: number; locDeleted: number }> = [];
 
     for (const feature of metric.totals_by_feature) {
-      // Feature Adoption
       accumulateFeatureAdoption(
         featureAdoptionAccumulator,
         userId,
@@ -253,7 +238,6 @@ export function aggregateMetrics(
         feature.code_generation_activity_count
       );
 
-      // Chat Users & Requests
       accumulateChatFeature(
         chatAccumulator,
         date,
@@ -262,7 +246,6 @@ export function aggregateMetrics(
         feature.user_initiated_interaction_count
       );
 
-      // Agent Heatmap (requests part)
       accumulateAgentHeatmapFromFeature(
         modelUsageAccumulator,
         date,
@@ -271,7 +254,6 @@ export function aggregateMetrics(
         feature.user_initiated_interaction_count
       );
 
-      // Collect impact data for batch processing
       featureImpacts.push({
         feature: feature.feature,
         locAdded: feature.loc_added_sum || 0,
@@ -279,11 +261,9 @@ export function aggregateMetrics(
       });
     }
 
-    // Process all feature impacts for this metric
     accumulateFeatureImpacts(impactAccumulator, date, userId, featureImpacts);
   }
 
-  // Compute all results
   return {
     stats: computeStats(statsAccumulator, filteredMetricsCount),
     userSummaries: computeUserSummaries(userSummaryAccumulator),

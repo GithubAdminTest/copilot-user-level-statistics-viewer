@@ -101,7 +101,6 @@ export function accumulateModelFeature(
   const prus = interactions * multiplier;
   const isPremium = isPremiumModel(modelLower);
 
-  // Daily Model Usage
   if (!accumulator.dailyModelUsage.has(date)) {
     accumulator.dailyModelUsage.set(date, {
       pruModels: 0,
@@ -120,7 +119,6 @@ export function accumulateModelFeature(
     dmu.pruModels += interactions;
   }
 
-  // Daily PRU Analysis
   if (!accumulator.dailyPRU.has(date)) {
     accumulator.dailyPRU.set(date, {
       pruRequests: 0,
@@ -145,7 +143,6 @@ export function accumulateModelFeature(
     dpru.modelStats.set(modelLower, { requests: interactions, prus, multiplier, isPremium });
   }
 
-  // Agent Mode Heatmap (PRUs part)
   if (feature === 'chat_panel_agent_mode') {
     if (!accumulator.dailyAgentHeatmap.has(date)) {
       accumulator.dailyAgentHeatmap.set(date, { requests: 0, users: new Set(), totalPRUs: 0 });
@@ -153,7 +150,6 @@ export function accumulateModelFeature(
     accumulator.dailyAgentHeatmap.get(date)!.totalPRUs += prus;
   }
 
-  // Model Feature Distribution
   if (!accumulator.modelFeatureDist.has(modelLower)) {
     accumulator.modelFeatureDist.set(modelLower, { features: new Map(), totalInteractions: 0 });
   }

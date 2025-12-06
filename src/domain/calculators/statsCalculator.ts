@@ -138,7 +138,6 @@ export function calculateStatsFromMetrics(
   const accumulator = createStatsAccumulator();
   const filterLanguage = options?.filterLanguage;
 
-  // Set report dates from first metric
   accumulator.reportStartDay = metrics[0].report_start_day;
   accumulator.reportEndDay = metrics[0].report_end_day;
 
