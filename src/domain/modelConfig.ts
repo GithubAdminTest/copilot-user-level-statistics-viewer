@@ -23,15 +23,17 @@ export const KNOWN_MODELS: Model[] = [
   new Model('gpt-4o-latest', 0, false),
   new Model('gpt-5-mini', 0, false),
   new Model('grok-code-fast', 0, false),
-  new Model('grok-code-fast-1', 0, false),
 
   // Premium models with multipliers
   new Model('gpt-5', 1, true),
   new Model('gpt-5.0', 1, true),
   new Model('gpt-5.1', 1, true),
+  new Model('gpt-5.2', 1, true),
   new Model('gpt-5-codex', 1, true),
   new Model('gpt-5.1-codex', 1, true),
+  new Model('gpt-5.1-codex-max', 1, true),
   new Model('gpt-5.1-codex-mini', 0.33, true),
+  new Model('grok-code-fast-1', 0.25, true),
   new Model('o3', 1, true),
   new Model('o3-mini', 0.33, true),
   new Model('o4-mini', 0.33, true),
@@ -42,11 +44,12 @@ export const KNOWN_MODELS: Model[] = [
   new Model('claude-4.5-sonnet', 1, true),
   new Model('claude-opus-4', 10, true),
   new Model('claude-opus-4.1', 10, true),
-  new Model('claude-opus-4.5', 1, true),
+  new Model('claude-opus-4.5', 3, true),
   new Model('claude-4.5-haiku', 0.33, true),
   new Model('gemini-2.0-flash', 0.25, true),
   new Model('gemini-2.5-pro', 1, true),
   new Model('gemini-3.0-pro', 1, true),
+  new Model('gemini-3.0-flash', 0.33, true),
 
   new Model('auto', 0.7, true), // a temp hack for auto premium models, we don't know the actual model behind it yet.
 
