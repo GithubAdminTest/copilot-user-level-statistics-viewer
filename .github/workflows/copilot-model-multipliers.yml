@@ -62,23 +62,19 @@ jobs:
         id: compare
         run: |
           set -euo pipefail
+          rc=0
           node data-utils/check-model-multipliers.mjs \
             --extracted .cache/model-multipliers.json \
-            --report .cache/report.md
-        continue-on-error: true
+            --report .cache/report.md || rc=$?
 
-      - name: Set issue flag
-        id: flag
-        run: |
-          set -euo pipefail
-          if [ "${{ steps.compare.outcome }}" = "success" ]; then
+          if [ "$rc" -eq 0 ]; then
             echo "needs_issue=false" >> "$GITHUB_OUTPUT"
           else
             echo "needs_issue=true" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Create issue
-        if: steps.flag.outputs.needs_issue == 'true'
+        if: steps.compare.outputs.needs_issue == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
