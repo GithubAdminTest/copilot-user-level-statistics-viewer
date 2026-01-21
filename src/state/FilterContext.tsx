@@ -5,9 +5,7 @@ import React, { createContext, useContext } from 'react';
 // FilterContext is kept for potential future filter additions
 // All filters have been removed as per requirements
 
-interface FilterContextValue {
-  // Empty for now, ready for future filters
-}
+type FilterContextValue = Record<string, never>;
 
 const FilterContext = createContext<FilterContextValue | undefined>(undefined);
 
