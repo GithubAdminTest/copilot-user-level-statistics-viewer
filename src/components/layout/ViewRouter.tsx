@@ -4,11 +4,9 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { CopilotMetrics } from '../../types/metrics';
 import { VIEW_MODES } from '../../types/navigation';
 import { useNavigation } from '../../state/NavigationContext';
-import { useFilters } from '../../state/FilterContext';
 import { useMetricsData, useRawMetrics } from '../MetricsContext';
 import { useMetricsProcessing } from '../../hooks/useMetricsProcessing';
 import { useFileUpload } from '../../hooks/useFileUpload';
-import { filterMetricsByDateRange } from '../../utils/dateFilters';
 import { FileUploadArea } from '../features/file-upload';
 import { OverviewDashboard } from '../features/overview';
 import UniqueUsersView from '../UniqueUsersView';
@@ -30,19 +28,13 @@ const ViewRouter: React.FC = () => {
     currentView, selectedUser, selectedModel,
     navigateTo, selectUser, selectModel, clearSelectedModel, resetNavigation
   } = useNavigation();
-  const { 
-    dateRange, removeUnknownLanguages,
-    setDateRange, setRemoveUnknownLanguages, resetFilters
-  } = useFilters();
   const { handleFileUpload, isLoading, error } = useFileUpload();
 
   const [selectedUserMetrics, setSelectedUserMetrics] = useState<CopilotMetrics[]>([]);
 
   const filteredData = useMetricsProcessing(
     rawMetrics,
-    originalStats,
-    dateRange,
-    removeUnknownLanguages
+    originalStats
   );
 
   const { 
@@ -65,11 +57,6 @@ const ViewRouter: React.FC = () => {
     joinedImpactData
   } = filteredData;
 
-  const filteredMetrics = useMemo(() => {
-    if (!originalStats) return [];
-    return filterMetricsByDateRange(rawMetrics, dateRange, originalStats.reportEndDay);
-  }, [rawMetrics, dateRange, originalStats]);
-
   useEffect(() => {
     if (stats) {
       setFilteredData(filteredData);
@@ -79,7 +66,6 @@ const ViewRouter: React.FC = () => {
   const resetData = () => {
     resetRawMetrics();
     resetNavigation();
-    resetFilters();
     setSelectedUserMetrics([]);
   };
 
@@ -110,7 +96,7 @@ const ViewRouter: React.FC = () => {
     case VIEW_MODES.IDES:
       return (
         <IDEView 
-          metrics={filteredMetrics} 
+          metrics={rawMetrics} 
           onBack={() => navigateTo(VIEW_MODES.OVERVIEW)} 
         />
       );
@@ -144,7 +130,7 @@ const ViewRouter: React.FC = () => {
           featureAdoptionData={featureAdoptionData}
           agentModeHeatmapData={agentModeHeatmapData}
           stats={stats}
-          metrics={filteredMetrics}
+          metrics={rawMetrics}
           onBack={() => navigateTo(VIEW_MODES.OVERVIEW)}
         />
       );
@@ -153,7 +139,7 @@ const ViewRouter: React.FC = () => {
       return (
         <UniqueUsersView 
           users={userSummaries} 
-          rawMetrics={filteredMetrics}
+          rawMetrics={rawMetrics}
           onBack={() => navigateTo(VIEW_MODES.OVERVIEW)} 
           onUserClick={handleUserClick}
         />
@@ -192,15 +178,10 @@ const ViewRouter: React.FC = () => {
       return (
         <OverviewDashboard
           stats={stats}
-          originalStats={originalStats}
           enterpriseName={enterpriseName}
           engagementData={engagementData}
           chatUsersData={chatUsersData}
           chatRequestsData={chatRequestsData}
-          dateRange={dateRange}
-          removeUnknownLanguages={removeUnknownLanguages}
-          onDateRangeChange={setDateRange}
-          onRemoveUnknownLanguagesChange={setRemoveUnknownLanguages}
           onNavigate={navigateTo}
           onModelSelect={selectModel}
           onReset={resetData}

@@ -35,7 +35,6 @@ export {
   createLanguageAccumulator,
   accumulateLanguageStats,
   computeLanguageStats,
-  shouldFilterLanguage,
 } from './languageCalculator';
 
 export {

@@ -1,6 +1,4 @@
 import { CopilotMetrics, MetricsStats, UserSummary } from '../types/metrics';
-import { DateRangeFilter } from '../types/filters';
-import { getFilteredDateRange } from '../utils/dateFilters';
 import {
   createStatsAccumulator,
   accumulateUserUsage,
@@ -25,7 +23,6 @@ import {
   createLanguageAccumulator,
   accumulateLanguageStats,
   computeLanguageStats,
-  shouldFilterLanguage,
 
   DailyModelUsageData,
   DailyPRUAnalysisData,
@@ -138,22 +135,9 @@ function computeUserSummaries(accumulator: UserSummaryAccumulator): UserSummary[
 }
 
 export function aggregateMetrics(
-  metrics: CopilotMetrics[],
-  options: {
-    removeUnknownLanguages?: boolean;
-    dateFilter?: DateRangeFilter;
-    reportEndDay?: string;
-  } = {}
+  metrics: CopilotMetrics[]
 ): AggregatedMetrics {
   let filteredMetricsCount = 0;
-
-  let startDate: Date | null = null;
-  let endDate: Date | null = null;
-  if (options.dateFilter && options.dateFilter !== 'all' && options.reportEndDay) {
-    const { startDay, endDay } = getFilteredDateRange(options.dateFilter, '', options.reportEndDay);
-    startDate = new Date(startDay);
-    endDate = new Date(endDay);
-  }
 
   const statsAccumulator = createStatsAccumulator();
   const userSummaryAccumulator = createUserSummaryAccumulator();
@@ -165,11 +149,6 @@ export function aggregateMetrics(
   const impactAccumulator = createImpactAccumulator();
 
   for (const metric of metrics) {
-    if (startDate && endDate) {
-      const metricDate = new Date(metric.day);
-      if (metricDate < startDate || metricDate > endDate) continue;
-    }
-
     filteredMetricsCount++;
 
     if (filteredMetricsCount === 1) {
@@ -193,10 +172,6 @@ export function aggregateMetrics(
     }
 
     for (const langFeature of metric.totals_by_language_feature) {
-      if (shouldFilterLanguage(langFeature.language, options.removeUnknownLanguages ?? false)) {
-        continue;
-      }
-
       const engagements = langFeature.code_generation_activity_count + langFeature.code_acceptance_activity_count;
       accumulateLanguageEngagement(statsAccumulator, langFeature.language, engagements);
 

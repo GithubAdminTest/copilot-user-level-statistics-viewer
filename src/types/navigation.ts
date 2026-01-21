@@ -13,8 +13,7 @@ import type {
   CodeCompletionImpactData,
   ModeImpactData,
 } from '../domain/calculators/metricCalculators';
-import type { DateRangeFilter } from './filters';
-import type { VoidCallback, ValueCallback, BooleanFilterCallback } from './events';
+import type { VoidCallback, ValueCallback } from './events';
 
 export const VIEW_MODES = {
   OVERVIEW: 'overview',
@@ -65,15 +64,10 @@ export interface BackNavigableViewProps {
 export interface OverviewViewProps extends BackNavigableViewProps {
   view: typeof VIEW_MODES.OVERVIEW;
   stats: MetricsStats;
-  originalStats: MetricsStats | null;
   enterpriseName: string | null;
   engagementData: DailyEngagementData[];
   chatUsersData: DailyChatUsersData[];
   chatRequestsData: DailyChatRequestsData[];
-  dateRange: DateRangeFilter;
-  removeUnknownLanguages: boolean;
-  onDateRangeChange: ValueCallback<DateRangeFilter>;
-  onRemoveUnknownLanguagesChange: BooleanFilterCallback;
   onNavigate: ValueCallback<ViewMode>;
   onModelSelect: ValueCallback<string>;
   onReset: VoidCallback;

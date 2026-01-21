@@ -1,14 +1,10 @@
 import { useMemo } from 'react';
 import { CopilotMetrics, MetricsStats } from '../types/metrics';
-import { DateRangeFilter } from '../types/filters';
 import { aggregateMetrics } from '../domain/metricsAggregator';
-import { getFilteredDateRange } from '../utils/dateFilters';
 
 export function useMetricsProcessing(
   rawMetrics: CopilotMetrics[],
-  originalStats: MetricsStats | null,
-  dateRangeFilter: DateRangeFilter,
-  removeUnknownLanguages: boolean
+  originalStats: MetricsStats | null
 ) {
   return useMemo(() => {
     if (!rawMetrics.length || !originalStats) {
@@ -33,23 +29,11 @@ export function useMetricsProcessing(
       };
     }
 
-    const aggregated = aggregateMetrics(rawMetrics, {
-      removeUnknownLanguages,
-      dateFilter: dateRangeFilter,
-      reportEndDay: originalStats.reportEndDay
-    });
-
-    // Update the date range in stats based on filter
-    const { startDay, endDay } = getFilteredDateRange(dateRangeFilter, originalStats.reportStartDay, originalStats.reportEndDay);
-    const updatedStats = {
-      ...aggregated.stats,
-      reportStartDay: startDay,
-      reportEndDay: endDay
-    };
+    const aggregated = aggregateMetrics(rawMetrics);
 
     return {
       ...aggregated,
-      stats: updatedStats
+      stats: aggregated.stats
     };
-  }, [rawMetrics, originalStats, dateRangeFilter, removeUnknownLanguages]);
+  }, [rawMetrics, originalStats]);
 }

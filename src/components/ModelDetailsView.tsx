@@ -2,8 +2,6 @@
 
 import React, { useMemo } from 'react';
 import { useRawMetrics } from './MetricsContext';
-import { useFilters } from '../state/FilterContext';
-import { filterMetricsByDateRange } from '../utils/dateFilters';
 import ModelsUsageChart from './charts/ModelsUsageChart';
 import InsightsCard from './ui/InsightsCard';
 import { KNOWN_MODELS } from '../domain/modelConfig';
@@ -15,16 +13,10 @@ interface ModelDetailsViewProps {
 }
 
 export default function ModelDetailsView({ onBack }: ModelDetailsViewProps) {
-  const { rawMetrics, originalStats } = useRawMetrics();
-  const { dateRange } = useFilters();
-
-  const metrics = useMemo(() => {
-    if (!originalStats) return [];
-    return filterMetricsByDateRange(rawMetrics, dateRange, originalStats.reportEndDay);
-  }, [rawMetrics, dateRange, originalStats]);
+  const { rawMetrics } = useRawMetrics();
 
   const premiumUtilization = useMemo(() => {
-    if (!metrics || metrics.length === 0) {
+    if (!rawMetrics || rawMetrics.length === 0) {
       return null;
     }
 
@@ -37,7 +29,7 @@ export default function ModelDetailsView({ onBack }: ModelDetailsViewProps) {
     let standardTotal = 0;
     let unknownTotal = 0;
 
-    for (const metric of metrics) {
+    for (const metric of rawMetrics) {
       for (const modelFeature of metric.totals_by_model_feature) {
         const count = modelFeature.user_initiated_interaction_count || 0;
         if (!count) continue;
@@ -157,7 +149,7 @@ export default function ModelDetailsView({ onBack }: ModelDetailsViewProps) {
           ? `There are ${numberFormatter.format(unknownTotal)} interactions from models that are not yet tagged as premium or standard.`
           : undefined
     };
-  }, [metrics]);
+  }, [rawMetrics]);
 
   return (
     <ViewPanel
@@ -196,8 +188,8 @@ export default function ModelDetailsView({ onBack }: ModelDetailsViewProps) {
             )}
           </InsightsCard>
         )}
-        <ModelsUsageChart metrics={metrics} variant="standard" />
-        <ModelsUsageChart metrics={metrics} variant="premium" />
+        <ModelsUsageChart metrics={rawMetrics} variant="standard" />
+        <ModelsUsageChart metrics={rawMetrics} variant="premium" />
       </div>
     </ViewPanel>
   );
