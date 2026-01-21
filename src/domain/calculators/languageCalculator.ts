@@ -76,12 +76,3 @@ export function computeLanguageStats(accumulator: LanguageAccumulator): Language
     }))
     .sort((a, b) => b.totalEngagements - a.totalEngagements);
 }
-
-export function shouldFilterLanguage(
-  language: string,
-  removeUnknownLanguages: boolean
-): boolean {
-  if (!removeUnknownLanguages) return false;
-  const lowerLang = language.toLowerCase();
-  return lowerLang === 'unknown' || language.trim() === '';
-}

@@ -8,21 +8,15 @@ import { MetricTileGroup, MetricTileIcon } from '../../ui';
 import EngagementChart from '../../charts/EngagementChart';
 import ChatUsersChart from '../../charts/ChatUsersChart';
 import ChatRequestsChart from '../../charts/ChatRequestsChart';
-import { DateRangeFilter } from '../../../types/filters';
 import { ViewMode, VIEW_MODES } from '../../../types/navigation';
-import type { VoidCallback, ValueCallback, BooleanFilterCallback } from '../../../types/events';
+import type { VoidCallback, ValueCallback } from '../../../types/events';
 
 interface OverviewDashboardProps {
   stats: MetricsStats;
-  originalStats: MetricsStats | null;
   enterpriseName: string | null;
   engagementData: DailyEngagementData[];
   chatUsersData: DailyChatUsersData[];
   chatRequestsData: DailyChatRequestsData[];
-  dateRange: DateRangeFilter;
-  removeUnknownLanguages: boolean;
-  onDateRangeChange: ValueCallback<DateRangeFilter>;
-  onRemoveUnknownLanguagesChange: BooleanFilterCallback;
   onNavigate: ValueCallback<ViewMode>;
   onModelSelect: ValueCallback<string>;
   onReset: VoidCallback;
@@ -30,15 +24,10 @@ interface OverviewDashboardProps {
 
 const OverviewDashboard: React.FC<OverviewDashboardProps> = ({
   stats,
-  originalStats,
   enterpriseName,
   engagementData,
   chatUsersData,
   chatRequestsData,
-  dateRange,
-  removeUnknownLanguages,
-  onDateRangeChange,
-  onRemoveUnknownLanguagesChange,
   onNavigate,
   onModelSelect,
   onReset,
@@ -174,14 +163,7 @@ const OverviewDashboard: React.FC<OverviewDashboardProps> = ({
       </div>
 
       <div className="w-64 flex-shrink-0">
-        <FilterPanel
-          onDateRangeChange={onDateRangeChange}
-          currentFilter={dateRange}
-          reportStartDay={originalStats?.reportStartDay || ''}
-          reportEndDay={originalStats?.reportEndDay || ''}
-          removeUnknownLanguages={removeUnknownLanguages}
-          onRemoveUnknownLanguagesChange={onRemoveUnknownLanguagesChange}
-        />
+        <FilterPanel />
       </div>
     </div>
   );

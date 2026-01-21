@@ -2,8 +2,6 @@
 
 import React, { useMemo } from 'react';
 import { useRawMetrics } from './MetricsContext';
-import { useFilters } from '../state/FilterContext';
-import { filterMetricsByDateRange } from '../utils/dateFilters';
 import ModelsUsageChart from './charts/ModelsUsageChart';
 import InsightsCard from './ui/InsightsCard';
 import { KNOWN_MODELS } from '../domain/modelConfig';
@@ -15,13 +13,11 @@ interface ModelDetailsViewProps {
 }
 
 export default function ModelDetailsView({ onBack }: ModelDetailsViewProps) {
-  const { rawMetrics, originalStats } = useRawMetrics();
-  const { dateRange } = useFilters();
+  const { rawMetrics } = useRawMetrics();
 
   const metrics = useMemo(() => {
-    if (!originalStats) return [];
-    return filterMetricsByDateRange(rawMetrics, dateRange, originalStats.reportEndDay);
-  }, [rawMetrics, dateRange, originalStats]);
+    return rawMetrics;
+  }, [rawMetrics]);
 
   const premiumUtilization = useMemo(() => {
     if (!metrics || metrics.length === 0) {
