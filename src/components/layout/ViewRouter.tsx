@@ -57,10 +57,6 @@ const ViewRouter: React.FC = () => {
     joinedImpactData
   } = filteredData;
 
-  const filteredMetrics = useMemo(() => {
-    return rawMetrics;
-  }, [rawMetrics]);
-
   useEffect(() => {
     if (stats) {
       setFilteredData(filteredData);
@@ -100,7 +96,7 @@ const ViewRouter: React.FC = () => {
     case VIEW_MODES.IDES:
       return (
         <IDEView 
-          metrics={filteredMetrics} 
+          metrics={rawMetrics} 
           onBack={() => navigateTo(VIEW_MODES.OVERVIEW)} 
         />
       );
@@ -134,7 +130,7 @@ const ViewRouter: React.FC = () => {
           featureAdoptionData={featureAdoptionData}
           agentModeHeatmapData={agentModeHeatmapData}
           stats={stats}
-          metrics={filteredMetrics}
+          metrics={rawMetrics}
           onBack={() => navigateTo(VIEW_MODES.OVERVIEW)}
         />
       );
@@ -143,7 +139,7 @@ const ViewRouter: React.FC = () => {
       return (
         <UniqueUsersView 
           users={userSummaries} 
-          rawMetrics={filteredMetrics}
+          rawMetrics={rawMetrics}
           onBack={() => navigateTo(VIEW_MODES.OVERVIEW)} 
           onUserClick={handleUserClick}
         />
