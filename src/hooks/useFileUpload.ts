@@ -5,6 +5,7 @@ import { CopilotMetrics } from '../types/metrics';
 import { parseMetricsStream } from '../domain/metricsParser';
 import { calculateStats } from '../domain/calculators/metricCalculators';
 import { useRawMetrics } from '../components/MetricsContext';
+import { getBasePath } from '../utils/basePath';
 
 interface UseFileUploadReturn {
   handleFileUpload: (event: React.ChangeEvent<HTMLInputElement>) => Promise<void>;
@@ -77,7 +78,7 @@ export function useFileUpload(): UseFileUploadReturn {
     setError(null);
 
     try {
-      const response = await fetch('/data/sample-report.ndjson');
+      const response = await fetch(`${getBasePath()}/data/sample-report.ndjson`);
       if (!response.ok) {
         throw new Error('Failed to load sample report');
       }
