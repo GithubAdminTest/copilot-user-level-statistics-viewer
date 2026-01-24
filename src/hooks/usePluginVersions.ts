@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
+import { getBasePath } from '../utils/basePath';
 
 export interface PluginVersion {
   version: string;
@@ -12,8 +13,6 @@ export interface PluginVersionsResult {
   isLoading: boolean;
   error: string | null;
 }
-
-const basePath = process.env.NODE_ENV === 'production' ? '/copilot-user-level-statistics-viewer' : '';
 
 export function usePluginVersions(type: 'jetbrains' | 'vscode'): PluginVersionsResult {
   const [versions, setVersions] = useState<PluginVersion[]>([]);
@@ -29,7 +28,7 @@ export function usePluginVersions(type: 'jetbrains' | 'vscode'): PluginVersionsR
         setError(null);
 
         const endpoint = type === 'jetbrains' ? '/data/jetbrains.json' : '/data/vscode.json';
-        const res = await fetch(`${basePath}${endpoint}`, { cache: 'no-store' });
+        const res = await fetch(`${getBasePath()}${endpoint}`, { cache: 'no-store' });
 
         if (!res.ok) {
           throw new Error(`HTTP ${res.status}`);
