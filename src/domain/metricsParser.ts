@@ -120,3 +120,77 @@ export async function parseMetricsStream(file: File, onProgress?: (count: number
 
   return metrics;
 }
+
+export interface MultiFileProgress {
+  currentFile: number;
+  totalFiles: number;
+  fileName: string;
+  recordsProcessed: number;
+}
+
+export async function parseMultipleMetricsStreams(
+  files: File[],
+  onProgress?: (progress: MultiFileProgress) => void
+): Promise<CopilotMetrics[]> {
+  const allMetrics: CopilotMetrics[] = [];
+  const pool = new StringPool();
+  let totalRecordsProcessed = 0;
+
+  for (let fileIndex = 0; fileIndex < files.length; fileIndex++) {
+    const file = files[fileIndex];
+    const stream = file.stream();
+    const reader = stream.getReader();
+    const decoder = new TextDecoder('utf-8');
+    let buffer = '';
+
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+
+        for (const line of lines) {
+          if (!line.trim()) continue;
+          const metric = validateAndParseLine(line, pool);
+          if (metric) {
+            allMetrics.push(metric);
+            totalRecordsProcessed++;
+          }
+        }
+
+        if (onProgress) {
+          onProgress({
+            currentFile: fileIndex + 1,
+            totalFiles: files.length,
+            fileName: file.name,
+            recordsProcessed: totalRecordsProcessed,
+          });
+        }
+      }
+
+      if (buffer.trim()) {
+        const metric = validateAndParseLine(buffer, pool);
+        if (metric) {
+          allMetrics.push(metric);
+          totalRecordsProcessed++;
+          if (onProgress) {
+            onProgress({
+              currentFile: fileIndex + 1,
+              totalFiles: files.length,
+              fileName: file.name,
+              recordsProcessed: totalRecordsProcessed,
+            });
+          }
+        }
+      }
+    } finally {
+      reader.releaseLock();
+    }
+  }
+
+  pool.clear();
+  return allMetrics;
+}
