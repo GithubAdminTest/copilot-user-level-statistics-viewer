@@ -1,22 +1,16 @@
-'use client';
+"use client";
 
 import React, { useState, useRef } from 'react';
 import PrivacyNotice from './PrivacyNotice';
 import HowToGetData from './HowToGetData';
-
-interface FileUploadProgress {
-  currentFile: number;
-  totalFiles: number;
-  fileName: string;
-  recordsProcessed: number;
-}
+import { MultiFileProgress } from '../../../domain/metricsParser';
 
 interface FileUploadAreaProps {
   onFileUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onSampleLoad: () => void;
   isLoading: boolean;
   error: string | null;
-  uploadProgress?: FileUploadProgress | null;
+  uploadProgress?: MultiFileProgress | null;
 }
 
 const FileUploadArea: React.FC<FileUploadAreaProps> = ({

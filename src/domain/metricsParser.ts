@@ -68,14 +68,22 @@ export function parseMetricsFile(fileContent: string): CopilotMetrics[] {
   return metrics;
 }
 
-export async function parseMetricsStream(file: File, onProgress?: (count: number) => void): Promise<CopilotMetrics[]> {
-  const metrics: CopilotMetrics[] = [];
-  const pool = new StringPool();
+interface StreamProcessingResult {
+  count: number;
+}
+
+async function processFileStream(
+  file: File,
+  metrics: CopilotMetrics[],
+  pool: StringPool,
+  onChunkProcessed?: (count: number) => void,
+  initialCount: number = 0
+): Promise<StreamProcessingResult> {
   const stream = file.stream();
   const reader = stream.getReader();
   const decoder = new TextDecoder('utf-8');
   let buffer = '';
-  let processedCount = 0;
+  let processedCount = initialCount;
 
   try {
     while (true) {
@@ -84,7 +92,6 @@ export async function parseMetricsStream(file: File, onProgress?: (count: number
 
       buffer += decoder.decode(value, { stream: true });
       const lines = buffer.split('\n');
-      // Keep the last part as it might be incomplete
       buffer = lines.pop() || '';
 
       for (const line of lines) {
@@ -95,26 +102,36 @@ export async function parseMetricsStream(file: File, onProgress?: (count: number
           processedCount++;
         }
       }
-      
-      if (onProgress) {
-        onProgress(processedCount);
+
+      if (onChunkProcessed) {
+        onChunkProcessed(processedCount);
       }
     }
 
-    // Process remaining buffer
     if (buffer.trim()) {
       const metric = validateAndParseLine(buffer, pool);
       if (metric) {
         metrics.push(metric);
         processedCount++;
-        if (onProgress) {
-          onProgress(processedCount);
+        if (onChunkProcessed) {
+          onChunkProcessed(processedCount);
         }
       }
     }
   } finally {
     reader.releaseLock();
-    // Pool can be cleared after parsing - interned strings in metrics remain valid
+  }
+
+  return { count: processedCount };
+}
+
+export async function parseMetricsStream(file: File, onProgress?: (count: number) => void): Promise<CopilotMetrics[]> {
+  const metrics: CopilotMetrics[] = [];
+  const pool = new StringPool();
+
+  try {
+    await processFileStream(file, metrics, pool, onProgress);
+  } finally {
     pool.clear();
   }
 
@@ -128,69 +145,54 @@ export interface MultiFileProgress {
   recordsProcessed: number;
 }
 
+export interface MultiFileResult {
+  metrics: CopilotMetrics[];
+  errors: Array<{ fileIndex: number; fileName: string; error: string }>;
+}
+
 export async function parseMultipleMetricsStreams(
   files: File[],
   onProgress?: (progress: MultiFileProgress) => void
-): Promise<CopilotMetrics[]> {
+): Promise<MultiFileResult> {
   const allMetrics: CopilotMetrics[] = [];
+  const errors: Array<{ fileIndex: number; fileName: string; error: string }> = [];
   const pool = new StringPool();
   let totalRecordsProcessed = 0;
 
-  for (let fileIndex = 0; fileIndex < files.length; fileIndex++) {
-    const file = files[fileIndex];
-    const stream = file.stream();
-    const reader = stream.getReader();
-    const decoder = new TextDecoder('utf-8');
-    let buffer = '';
+  try {
+    for (let fileIndex = 0; fileIndex < files.length; fileIndex++) {
+      const file = files[fileIndex];
 
-    try {
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
+      try {
+        const result = await processFileStream(
+          file,
+          allMetrics,
+          pool,
+          onProgress
+            ? (count) => {
+                onProgress({
+                  currentFile: fileIndex + 1,
+                  totalFiles: files.length,
+                  fileName: file.name,
+                  recordsProcessed: count,
+                });
+              }
+            : undefined,
+          totalRecordsProcessed
+        );
 
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split('\n');
-        buffer = lines.pop() || '';
-
-        for (const line of lines) {
-          if (!line.trim()) continue;
-          const metric = validateAndParseLine(line, pool);
-          if (metric) {
-            allMetrics.push(metric);
-            totalRecordsProcessed++;
-          }
-        }
-
-        if (onProgress) {
-          onProgress({
-            currentFile: fileIndex + 1,
-            totalFiles: files.length,
-            fileName: file.name,
-            recordsProcessed: totalRecordsProcessed,
-          });
-        }
+        totalRecordsProcessed = result.count;
+      } catch (err) {
+        errors.push({
+          fileIndex: fileIndex + 1,
+          fileName: file.name,
+          error: err instanceof Error ? err.message : 'Unknown error',
+        });
       }
-
-      if (buffer.trim()) {
-        const metric = validateAndParseLine(buffer, pool);
-        if (metric) {
-          allMetrics.push(metric);
-          totalRecordsProcessed++;
-          if (onProgress) {
-            onProgress({
-              currentFile: fileIndex + 1,
-              totalFiles: files.length,
-              fileName: file.name,
-              recordsProcessed: totalRecordsProcessed,
-            });
-          }
-        }
-      }
-    } finally {
-      reader.releaseLock();
     }
+  } finally {
+    pool.clear();
   }
 
-  pool.clear();
-  return allMetrics;
+  return { metrics: allMetrics, errors };
 }
