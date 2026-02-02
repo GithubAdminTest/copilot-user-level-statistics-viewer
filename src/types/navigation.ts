@@ -17,6 +17,7 @@ import type { VoidCallback, ValueCallback } from './events';
 
 export const VIEW_MODES = {
   OVERVIEW: 'overview',
+  EXECUTIVE_SUMMARY: 'executiveSummary',
   USERS: 'users',
   USER_DETAILS: 'userDetails',
   LANGUAGES: 'languages',
@@ -80,6 +81,17 @@ export interface UsersViewProps extends BackNavigableViewProps {
   onUserClick: (userLogin: string, userId: number, userMetrics: CopilotMetrics[]) => void;
 }
 
+export interface ExecutiveSummaryViewProps extends BackNavigableViewProps {
+  view: typeof VIEW_MODES.EXECUTIVE_SUMMARY;
+  stats: MetricsStats;
+  joinedImpactData: ModeImpactData[];
+  enterpriseName: string | null;
+  modelUsageData: DailyModelUsageData[];
+  agentImpactData: AgentImpactData[];
+  codeCompletionImpactData: CodeCompletionImpactData[];
+  featureAdoptionData: FeatureAdoptionData;
+}
+
 export interface UserDetailsViewProps extends BackNavigableViewProps {
   view: typeof VIEW_MODES.USER_DETAILS;
   userMetrics: CopilotMetrics[];
@@ -132,6 +144,7 @@ export interface ModelDetailsViewProps extends BackNavigableViewProps {
  */
 export type ViewProps =
   | OverviewViewProps
+  | ExecutiveSummaryViewProps
   | UsersViewProps
   | UserDetailsViewProps
   | LanguagesViewProps

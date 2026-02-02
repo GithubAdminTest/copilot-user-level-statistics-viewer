@@ -17,6 +17,7 @@ import CopilotImpactView from '../CopilotImpactView';
 import PRUUsageAnalysisView from '../PRUUsageAnalysisView';
 import CopilotAdoptionView from '../CopilotAdoptionView';
 import ModelDetailsView from '../ModelDetailsView';
+import ExecutiveSummaryView from '../ExecutiveSummaryView';
 
 const ViewRouter: React.FC = () => {
   const { setFilteredData } = useMetricsData();
@@ -87,6 +88,20 @@ const ViewRouter: React.FC = () => {
   }
 
   switch (currentView) {
+    case VIEW_MODES.EXECUTIVE_SUMMARY:
+      return (
+        <ExecutiveSummaryView
+          stats={stats}
+          enterpriseName={enterpriseName}
+          joinedImpactData={joinedImpactData}
+          modelUsageData={modelUsageData}
+          agentImpactData={agentImpactData}
+          codeCompletionImpactData={codeCompletionImpactData}
+          featureAdoptionData={featureAdoptionData}
+          onBack={() => navigateTo(VIEW_MODES.OVERVIEW)}
+        />
+      );
+
     case VIEW_MODES.LANGUAGES:
       return (
         <LanguagesView 

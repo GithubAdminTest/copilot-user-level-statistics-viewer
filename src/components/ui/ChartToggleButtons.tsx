@@ -19,7 +19,7 @@ export default function ChartToggleButtons<T extends string>({
   onChange,
 }: ChartToggleButtonsProps<T>) {
   return (
-    <div className="flex gap-2">
+    <div className="flex gap-2 print:hidden">
       {options.map((option) => (
         <button
           key={option.value}

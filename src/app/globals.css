@@ -1,1 +1,48 @@
 @import "tailwindcss";
+
+/* Remove browser print headers/footers */
+@page {
+  margin: 0.5in;
+  margin-top: 0.25in;
+  margin-bottom: 0.25in;
+}
+
+@media print {
+  /* Remove browser headers/footers by using minimal margins */
+  html {
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    margin: 0;
+    padding: 0.25in;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  canvas {
+    max-width: 100% !important;
+    width: 100% !important;
+    max-height: 220px !important;
+    height: auto !important;
+  }
+
+  .chartjs-size-monitor,
+  .chartjs-size-monitor-expand,
+  .chartjs-size-monitor-shrink {
+    display: none !important;
+  }
+
+  /* Chart container print optimizations */
+  [class*="chartHeight"] {
+    height: auto !important;
+    min-height: 180px !important;
+    max-height: 220px !important;
+  }
+
+  /* Ensure chart legend is readable */
+  .chartjs-legend {
+    font-size: 9px !important;
+  }
+}
