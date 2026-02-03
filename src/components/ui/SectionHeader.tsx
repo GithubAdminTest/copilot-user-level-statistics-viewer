@@ -9,6 +9,7 @@ interface SectionHeaderProps {
   title: string;
   description?: Description;
   onBack: VoidCallback;
+  actions?: React.ReactNode;
   className?: string;
   titleClassName?: string;
   descriptionClassName?: string;
@@ -24,6 +25,7 @@ export default function SectionHeader({
   title,
   description,
   onBack,
+  actions,
   className,
   titleClassName,
   descriptionClassName,
@@ -48,9 +50,12 @@ export default function SectionHeader({
           description
         ))}
       </div>
-      <button onClick={onBack} className={buttonClassName}>
-        {backButtonLabel}
-      </button>
+      <div className="flex items-center gap-2">
+        {actions}
+        <button onClick={onBack} className={buttonClassName}>
+          {backButtonLabel}
+        </button>
+      </div>
     </div>
   );
 }
