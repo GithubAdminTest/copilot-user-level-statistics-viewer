@@ -106,7 +106,7 @@ export default function ModeImpactChart({
         { label: 'Net Change', value: `${netChange >= 0 ? '+' : ''}${netChange.toLocaleString()}`, color: netChange >= 0 ? 'text-green-600' : 'text-red-600' },
       ]}
       footer={
-        <div className="text-xs text-gray-500">
+        <div className="text-xs text-gray-500 print:text-[10px] print:text-gray-700">
           Average daily users: {averageDailyUsers}
         </div>
       }

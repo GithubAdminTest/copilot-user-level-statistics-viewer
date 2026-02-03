@@ -50,12 +50,20 @@ const OverviewDashboard: React.FC<OverviewDashboardProps> = ({
             </>
           )}
         </h2>
-        <button
-          onClick={onReset}
-          className="px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-md transition-colors"
-        >
-          Upload New File
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => onNavigate(VIEW_MODES.EXECUTIVE_SUMMARY)}
+            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 border border-gray-200 rounded-md transition-colors"
+          >
+            Executive Summary
+          </button>
+          <button
+            onClick={onReset}
+            className="px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-md transition-colors"
+          >
+            Upload New File
+          </button>
+        </div>
       </div>
     
       <MetricTileGroup

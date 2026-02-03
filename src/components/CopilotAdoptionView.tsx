@@ -324,6 +324,7 @@ export default function CopilotAdoptionView({ featureAdoptionData, agentModeHeat
           featureAdoptionData || {
             totalUsers: 0,
             completionUsers: 0,
+            completionOnlyUsers: 0,
             chatUsers: 0,
             agentModeUsers: 0,
             askModeUsers: 0,
