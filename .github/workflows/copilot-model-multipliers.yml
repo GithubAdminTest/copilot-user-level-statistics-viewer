@@ -2,8 +2,7 @@ name: Sync Copilot model multipliers
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '17 3 * * *' # daily
+  
 
 permissions:
   contents: read
